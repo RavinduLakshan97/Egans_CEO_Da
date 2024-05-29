@@ -30,11 +30,16 @@ export function Home() {
   const [card3Content, setCard3Content] = useState("");
   const [card4Content, setCard4Content] = useState("");
   const [tableData, setTableData] = useState([]);
+  const [filteredTableData, setFilteredTableData] = useState([]);
 
   useEffect(() => {
     fetchProducts(selectedOption);
     updateCardContents(selectedOption);
   }, [selectedOption]);
+
+  useEffect(() => {
+    filterTableData();
+  }, [tableData, viewCount]);
 
   const fetchProducts = async (option) => {
     try {
@@ -97,20 +102,31 @@ export function Home() {
     updateCardContents(e.target.value);
   };
 
+  const filterTableData = () => {
+    const filteredData = tableData.slice(0, viewCount);
+    setFilteredTableData(filteredData);
+  };
+
   const updateCardContents = (option) => {
     if (option === "allProducts") {
-      //setCard3Content("Content for Products - Card 3");
-      setCard4Content("");
+      setCard3Content("Content for Products - Card 3");
+      //setCard4Content("");
       setTableData([
         { code: "P001", description: "Product 1" },
         { code: "P002", description: "Product 2" },
+        { code: "P003", description: "Product 3" },
+        { code: "P004", description: "Product 4" },
+        { code: "P005", description: "Product 5" },
       ]);
     } else if (option === "allSuppliers") {
-      //setCard3Content("Content for Suppliers - Card 3");
-      setCard4Content("");
+      setCard3Content("Content for Suppliers - Card 3");
+      //setCard4Content("");
       setTableData([
         { code: "S001", description: "Supplier 1" },
         { code: "S002", description: "Supplier 2" },
+        { code: "S003", description: "Supplier 3" },
+        { code: "S004", description: "Supplier 4" },
+        { code: "S005", description: "Supplier 5" },
       ]);
     }
   };
@@ -136,25 +152,25 @@ export function Home() {
           </select>
         </Card>
         <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}>
-          <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
-            <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by {selectedOption === "allProducts" ? "Product Code" : "Supplier Code"}</label>
-            <Menu open={!!searchTerm} handler={setSearchTerm}>
-              <MenuHandler>
-                <Input
-                  className="mb-3 bg-white border-blue-gray-100 shadow-sm px-4 rounded-lg"
-                  label={`Search ${selectedOption === "allProducts" ? "Product Code" : "Supplier Code"}`}
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </MenuHandler>
-              <MenuList>
-                {filteredProducts.map((product, index) => (
-                  <MenuItem key={index}>{product.name}</MenuItem>
-                ))}
-              </MenuList>
-            </Menu>
-          </div>
-        </Card>
+  <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
+    <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
+    <Menu open={!!searchTerm} handler={setSearchTerm}>
+      <MenuHandler>
+        <Input
+          className="mb-3 bg-white border-blue-gray-100 shadow-sm px-4 rounded-lg"
+          label="Search Product Code"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </MenuHandler>
+      <MenuList>
+        {filteredProducts.map((product, index) => (
+          <MenuItem key={index}>{product.name}</MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
+  </div>
+</Card>
         <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
           <div className="flex-1 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2">View Count</label>
@@ -164,11 +180,6 @@ export function Home() {
               <option value={3}>3</option>
               <option value={4}>4</option>
               <option value={5}>5</option>
-              <option value={6}>6</option>
-              <option value={7}>7</option>
-              <option value={8}>8</option>
-              <option value={9}>9</option>
-              <option value={10}>10</option>
             </select>
           </div>
           <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
@@ -206,7 +217,7 @@ export function Home() {
             showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
             card3Content={card3Content}
             card4Content={card4Content}
-            tableData={tableData}
+            tableData={filteredTableData}
             selectedOption={selectedOption}
           />
         ))}
