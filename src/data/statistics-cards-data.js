@@ -6,24 +6,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 export const statisticsCardsData = [
-  {
-    color: "gray",
-    icon: BanknotesIcon,
-    backgroundColor: "bg-custom-blue",
-    title: "Today's Money",
-    from: "From :",
-    to: "To:",
-    product: "Product:",
-    based_on: "Based on",
-    value: "$53k",
-    footer: {
-      color: "text-green-500",
-      value: "+55%",
-      label: "than last week",
-    },
-    showDatePickers: true,
-    showProductSelector: true,
-  },
+
   {
     color: "gray",
     icon: UsersIcon,
@@ -51,6 +34,7 @@ export const statisticsCardsData = [
     },
     showOrderStats: true,
   },
+
   {
     color: "gray",
     icon: ChartBarIcon,
@@ -64,6 +48,9 @@ export const statisticsCardsData = [
     },
     showProductStats: true,
   },
+  {
+    showMostPurchaseProductSupplier: true,
+  }
   
 ];
 

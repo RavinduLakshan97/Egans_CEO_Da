@@ -7,9 +7,9 @@ module.exports = withMT({
     extend: {
       colors: {
         'custom-blue': '#7DA0FA',
-        'custom-red':'#F3797E',
-        'custom-green':'#71C02B',
-        'custom-yellow':'#FFC107',
+        'custom-red':'#CFE1B9',
+        'custom-green':'#F2E9E4',
+        'custom-yellow':'#CFDBD5',
       },
     },
   },

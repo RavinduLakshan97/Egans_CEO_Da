@@ -1,7 +1,9 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import {
   Typography,
   Card,
+  Input,
   CardHeader,
   CardBody,
   IconButton,
@@ -13,10 +15,6 @@ import {
   Tooltip,
   Progress,
 } from "@material-tailwind/react";
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
 import {
@@ -25,44 +23,206 @@ import {
   projectsTableData,
   ordersOverviewData,
 } from "@/data";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 
 export function Home() {
+
+  const [selectedOption, setSelectedOption] = useState("allProducts");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [basedOn, setBasedOn] = useState('value');
+  const [viewCount, setViewCount] = useState(3);
+  const [chartData, setChartData] = useState(null);
+
+  useEffect(() => {
+    // Fetch initial data based on selected option
+    fetchProducts(selectedOption);
+  }, [selectedOption]);
+
+  const fetchProducts = async (option) => {
+    try {
+      const url = `{API_URL}api/products?type=${option}`;
+      const response = await axios.get(url);
+      setProducts(response.data);
+      setFilteredProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    const filtered = products.filter(product => product.name.toLowerCase().includes(term.toLowerCase()));
+    setFilteredProducts(filtered);
+    setMenuOpen(term.length > 0);
+  };
+
+  const fetchData = async () => {
+    const isBasedOnInvoiceCount = basedOn === 'count';
+    const isBasedOnValue = basedOn === 'value';
+    const isBasedOnQty = basedOn === 'qty';
+    
+    const url = `{API_URL}api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${products}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
+    
+    try {
+      const response = await axios.get(url);
+      const data = response.data.dashboardModels;
+      const labels = data.map(item => item.supplierCode);
+      const values = data.map(item => {
+        if (basedOn === 'value') return item.totalAmount;
+        if (basedOn === 'qty') return item.totalQuantity;
+        if (basedOn === 'count') return item.invoiceCount;
+        return 0;
+      });
+
+      setChartData({
+        series: values,
+        options: {
+          labels: labels,
+          colors: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"],
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (fromDate && toDate && products && basedOn && viewCount) {
+      fetchData();
+    }
+  }, [fromDate, toDate, products, basedOn, viewCount]);
+
+  const handleOptionChange = (e) => {
+    setSelectedOption(e.target.value);
+    setSearchTerm(""); 
+    fetchProducts(e.target.value);
+  };
+
+
   return (
     <div className="mt-3">
-      <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-      <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#00CCCD' }}>
-      <div> 
+      <div className="mb-7 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+      <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#F28482' }}>
+      
 
-      <div className="px-2 mt-3">      
-          <label className="block text-sm font-medium text-black mb-2 mt-1 px-2"> From </label>
-          <input type="date" className="mb-3 border-blue-gray-100 shadow-sm px-4 rounded-md" />     
+      <div className="px-1 mt-3 grid grid-cols-1">      
+          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
+          <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={fromDate} onChange={(e) => setFromDate(e.target.value)}/>     
       </div>
 
-      </div>
-
-      <div className="mb-4 mt-2">
-          <label className="block text-sm font-medium text-black mb-2 mt-1 px-2"> To </label>
-          <input type="date" className="mb-3  border-blue-gray-100 shadow-sm px-4 rounded-md" />
+    
+      <div className="px-1 mt-3 grid grid-cols-1">      
+          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> To </label>
+          <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={toDate} 
+            onChange={(e) => setToDate(e.target.value)}/>     
       </div>
 
       </Card>
      
-      <Card className="bg-gray-200" style={{ backgroundColor: '#6F42C1' }}>
+      <Card className="bg-gray-200" style={{ backgroundColor: '#C8B6FF' }}>
       <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Proiduct/Supplier </label>
-          <select className="form-control mr-20 ml-4 rounded-sm border-blue-gray-100">
+      <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" value={selectedOption} onChange={handleOptionChange}>
             <option value="allProducts">All Products</option>
             <option value="allSuppliers">All Suppliers</option>
           </select>
       </Card>
 
-      <Card className="bg-gray-200" style={{ backgroundColor: '#198754' }}>
-          
+      <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}>
+      <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
+            <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by {selectedOption === "allProducts" ? "Product Code" : "Supplier Code"}</label>
+            <Menu open={!!searchTerm} handler={setSearchTerm}>
+              <MenuHandler>
+                <Input
+                  className="mb-3 bg-white border-blue-gray-100 shadow-sm px-4 rounded-lg"
+                  label={`Search ${selectedOption === "allProducts" ? "Product Code" : "Supplier Code"}`}
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </MenuHandler>
+              <MenuList>
+                {filteredProducts.map((product, index) => (
+                  <MenuItem key={index}>{product.name}</MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          </div>
+      </Card>
+
+      <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
+      
+      <div className="flex-1 mt-3 ml-2">
+            <label className="block text-sm font-medium text-black mb-2">
+              View Count
+            </label>
+            <select
+              className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600"
+              value={viewCount}
+              onChange={(e) => setViewCount(e.target.value)}
+            > 
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+              <option value={3}>3</option>
+              <option value={4}>4</option>
+              <option value={5}>5</option>
+              <option value={6}>6</option>
+              <option value={7}>7</option>
+              <option value={8}>8</option>
+              <option value={9}>9</option>
+              <option value={10}>10</option>
+            </select>
+          </div>
+          <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">
+            Based On
+          </label>
+          <div className="flex items-center space-x-6 ml-2 mb-2">
+            <div>
+              <input
+                className="mr-1"
+                type="radio"
+                id="value"
+                name="basedOn"
+                value="value"
+                checked={basedOn === 'value'}
+                onChange={(e) => setBasedOn(e.target.value)}
+              />
+              <label htmlFor="value" className="text-black">Value</label>
+            </div>
+            <div>
+              <input
+                className="mr-1"
+                type="radio"
+                id="qty"
+                name="basedOn"
+                value="qty"
+                checked={basedOn === 'qty'}
+                onChange={(e) => setBasedOn(e.target.value)}
+              />
+              <label htmlFor="qty" className="text-black">Quantity</label>
+            </div>
+            <div>
+              <input
+                className="mr-1"
+                type="radio"
+                id="count"
+                name="basedOn"
+                value="count"
+                checked={basedOn === 'count'}
+                onChange={(e) => setBasedOn(e.target.value)}
+              />
+              <label htmlFor="count" className="text-black">Count</label>
+            </div>
+          </div>
       </Card>
       </div>
-      <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4 ">
         
-        {statisticsCardsData.map(({ icon, title, footer,from,to,product,based_on,showDatePickers,showProductSelector,showCustomFields,showOrderStats,showProductStats,backgroundColor, ...rest }) => (
+        {statisticsCardsData.map(({ icon, title, footer,from,to,product,based_on,showDatePickers,showCustomFields,showOrderStats,showProductStats,showMostPurchaseProductSupplier,backgroundColor, ...rest }) => (
+        
           <StatisticsCard
             key={title}
             {...rest}
@@ -71,23 +231,18 @@ export function Home() {
             product={product}
             backgroundColor={backgroundColor}
             showDatePickers={showDatePickers}
-            showProductSelector={showProductSelector}
             based_on={based_on}
             icon={React.createElement(icon, {
               className: "w-6 h-6 text-white",
             })}
-            // footer={
-            //   <Typography className="font-normal text-blue-gray-600">
-            //     <strong className={footer.color}>{footer.value}</strong>
-            //     &nbsp;{footer.label}
-            //   </Typography>
-            // }
             showCustomFields={showCustomFields}
             showOrderStats={showOrderStats}
             showProductStats={showProductStats}
+            showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
           />
         ))}
       </div>
+
       <div className="mb-3 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
@@ -98,199 +253,24 @@ export function Home() {
                 variant="small"
                 className="flex items-center font-normal text-blue-gray-600"
               >
-                <ClockIcon strokeWidth={2} className="h-4 w-4 text-blue-gray-400" />
                 &nbsp;{props.footer}
               </Typography>
             }
           />
         ))}
       </div>
-      {/* <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
-          <CardHeader
-            floated={false}
-            shadow={false}
-            color="transparent"
-            className="m-0 flex items-center justify-between p-6"
-          >
-            <div>
-              <Typography variant="h6" color="blue-gray" className="mb-1">
-                Projects
-              </Typography>
-              <Typography
-                variant="small"
-                className="flex items-center gap-1 font-normal text-blue-gray-600"
-              >
-                <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
-                <strong>30 done</strong> this month
-              </Typography>
-            </div>
-            <Menu placement="left-start">
-              <MenuHandler>
-                <IconButton size="sm" variant="text" color="blue-gray">
-                  <EllipsisVerticalIcon
-                    strokeWidth={3}
-                    fill="currenColor"
-                    className="h-6 w-6"
-                  />
-                </IconButton>
-              </MenuHandler>
-              <MenuList>
-                <MenuItem>Action</MenuItem>
-                <MenuItem>Another Action</MenuItem>
-                <MenuItem>Something else here</MenuItem>
-              </MenuList>
-            </Menu>
-          </CardHeader>
-          <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-            <table className="w-full min-w-[640px] table-auto">
-              <thead>
-                <tr>
-                  {["companies", "members", "budget", "completion"].map(
-                    (el) => (
-                      <th
-                        key={el}
-                        className="border-b border-blue-gray-50 py-3 px-6 text-left"
-                      >
-                        <Typography
-                          variant="small"
-                          className="text-[11px] font-medium uppercase text-blue-gray-400"
-                        >
-                          {el}
-                        </Typography>
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {projectsTableData.map(
-                  ({ img, name, members, budget, completion }, key) => {
-                    const className = `py-3 px-5 ${
-                      key === projectsTableData.length - 1
-                        ? ""
-                        : "border-b border-blue-gray-50"
-                    }`;
-
-                    return (
-                      <tr key={name}>
-                        <td className={className}>
-                          <div className="flex items-center gap-4">
-                            <Avatar src={img} alt={name} size="sm" />
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-bold"
-                            >
-                              {name}
-                            </Typography>
-                          </div>
-                        </td>
-                        <td className={className}>
-                          {members.map(({ img, name }, key) => (
-                            <Tooltip key={name} content={name}>
-                              <Avatar
-                                src={img}
-                                alt={name}
-                                size="xs"
-                                variant="circular"
-                                className={`cursor-pointer border-2 border-white ${
-                                  key === 0 ? "" : "-ml-2.5"
-                                }`}
-                              />
-                            </Tooltip>
-                          ))}
-                        </td>
-                        <td className={className}>
-                          <Typography
-                            variant="small"
-                            className="text-xs font-medium text-blue-gray-600"
-                          >
-                            {budget}
-                          </Typography>
-                        </td>
-                        <td className={className}>
-                          <div className="w-10/12">
-                            <Typography
-                              variant="small"
-                              className="mb-1 block text-xs font-medium text-blue-gray-600"
-                            >
-                              {completion}%
-                            </Typography>
-                            <Progress
-                              value={completion}
-                              variant="gradient"
-                              color={completion === 100 ? "green" : "blue"}
-                              className="h-1"
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-              </tbody>
-            </table>
-          </CardBody>
-        </Card>
-        <Card className="border border-blue-gray-100 shadow-sm">
-          <CardHeader
-            floated={false}
-            shadow={false}
-            color="transparent"
-            className="m-0 p-6"
-          >
-            <Typography variant="h6" color="blue-gray" className="mb-2">
-              Orders Overview
-            </Typography>
-            <Typography
-              variant="small"
-              className="flex items-center gap-1 font-normal text-blue-gray-600"
-            >
-              <ArrowUpIcon
-                strokeWidth={3}
-                className="h-3.5 w-3.5 text-green-500"
-              />
-              <strong>24%</strong> this month
-            </Typography>
-          </CardHeader>
-          <CardBody className="pt-0">
-            {ordersOverviewData.map(
-              ({ icon, color, title, description }, key) => (
-                <div key={title} className="flex items-start gap-4 py-3">
-                  <div
-                    className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${
-                      key === ordersOverviewData.length - 1
-                        ? "after:h-0"
-                        : "after:h-4/6"
-                    }`}
-                  >
-                    {React.createElement(icon, {
-                      className: `!w-5 !h-5 ${color}`,
-                    })}
-                  </div>
-                  <div>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="block font-medium"
-                    >
-                      {title}
-                    </Typography>
-                    <Typography
-                      as="span"
-                      variant="small"
-                      className="text-xs font-medium text-blue-gray-500"
-                    >
-                      {description}
-                    </Typography>
-                  </div>
-                </div>
-              )
-            )}
-          </CardBody>
-        </Card>
-      </div> */}
+      {chartData && (
+          <StatisticsChart
+            chart={{
+              type: 'pie',
+              height: 220,
+              series: chartData.series,
+              options: chartData.options,
+            }}
+            title="Product Purchase Audit"
+            description="Shows the audit of product purchases"
+          />
+        )}
     </div>
   );
 }

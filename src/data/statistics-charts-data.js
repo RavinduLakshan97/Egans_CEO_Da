@@ -94,26 +94,18 @@ const completedTaskChart = {
     },
   },
 };
-const completedTasksChart = {
+
+
+const completedTasksChart = (data) => ({
   type: "pie",
   height: 220,
-  series: [ 300, 220, 500, 250, 400, 230, 500],
+  series: data.series,
   options: {
     ...chartsConfig,
     colors: ["#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#FFCD56", "#C9CBCF", "#36A2EB"],
-    labels: [
-      // "Apr",
-      // "May",
-      "John",
-      "Jessica",
-      "Austin",
-      "Steve",
-      "Octavia",
-      "Ned",
-      "David",
-    ],
+    labels: data.labels,
   },
-};
+});
 
 
 export const statisticsChartsData = [
@@ -134,9 +126,9 @@ export const statisticsChartsData = [
   {
     color: "white",
     title: "Product Purchase Audit",
-    description: "",
+    description: "Shows the audit of product purchases",
     footer: "just updated",
-    chart: completedTasksChart,
+    chart: completedTasksChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),  
   },
 ];
 
