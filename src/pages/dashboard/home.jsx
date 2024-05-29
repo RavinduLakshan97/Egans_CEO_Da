@@ -1,32 +1,22 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Typography,
   Card,
   Input,
-  CardHeader,
-  CardBody,
-  IconButton,
   Menu,
   MenuHandler,
   MenuList,
   MenuItem,
-  Avatar,
-  Tooltip,
-  Progress,
 } from "@material-tailwind/react";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
 import {
   statisticsCardsData,
   statisticsChartsData,
-  projectsTableData,
-  ordersOverviewData,
 } from "@/data";
 import axios from "axios";
 
 export function Home() {
-
   const [selectedOption, setSelectedOption] = useState("allProducts");
   const [searchTerm, setSearchTerm] = useState("");
   const [fromDate, setFromDate] = useState('');
@@ -37,9 +27,13 @@ export function Home() {
   const [viewCount, setViewCount] = useState(3);
   const [chartData, setChartData] = useState(null);
 
+  const [card3Content, setCard3Content] = useState("");
+  const [card4Content, setCard4Content] = useState("");
+  const [tableData, setTableData] = useState([]);
+
   useEffect(() => {
-    // Fetch initial data based on selected option
     fetchProducts(selectedOption);
+    updateCardContents(selectedOption);
   }, [selectedOption]);
 
   const fetchProducts = async (option) => {
@@ -58,7 +52,6 @@ export function Home() {
     setSearchTerm(term);
     const filtered = products.filter(product => product.name.toLowerCase().includes(term.toLowerCase()));
     setFilteredProducts(filtered);
-    setMenuOpen(term.length > 0);
   };
 
   const fetchData = async () => {
@@ -101,39 +94,49 @@ export function Home() {
     setSelectedOption(e.target.value);
     setSearchTerm(""); 
     fetchProducts(e.target.value);
+    updateCardContents(e.target.value);
   };
 
+  const updateCardContents = (option) => {
+    if (option === "allProducts") {
+      //setCard3Content("Content for Products - Card 3");
+      setCard4Content("");
+      setTableData([
+        { code: "P001", description: "Product 1" },
+        { code: "P002", description: "Product 2" },
+      ]);
+    } else if (option === "allSuppliers") {
+      //setCard3Content("Content for Suppliers - Card 3");
+      setCard4Content("");
+      setTableData([
+        { code: "S001", description: "Supplier 1" },
+        { code: "S002", description: "Supplier 2" },
+      ]);
+    }
+  };
 
   return (
     <div className="mt-3">
       <div className="mb-7 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-      <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#F28482' }}>
-      
-
-      <div className="px-1 mt-3 grid grid-cols-1">      
-          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
-          <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={fromDate} onChange={(e) => setFromDate(e.target.value)}/>     
-      </div>
-
-    
-      <div className="px-1 mt-3 grid grid-cols-1">      
-          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> To </label>
-          <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={toDate} 
-            onChange={(e) => setToDate(e.target.value)}/>     
-      </div>
-
-      </Card>
-     
-      <Card className="bg-gray-200" style={{ backgroundColor: '#C8B6FF' }}>
-      <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Proiduct/Supplier </label>
-      <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" value={selectedOption} onChange={handleOptionChange}>
+        <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#F28482' }}>
+          <div className="px-1 mt-3 grid grid-cols-1">      
+            <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
+            <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={fromDate} onChange={(e) => setFromDate(e.target.value)}/>     
+          </div>
+          <div className="px-1 mt-3 grid grid-cols-1">      
+            <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> To </label>
+            <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={toDate} onChange={(e) => setToDate(e.target.value)}/>     
+          </div>
+        </Card>
+        <Card className="bg-gray-200" style={{ backgroundColor: '#C8B6FF' }}>
+          <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Product/Supplier </label>
+          <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" value={selectedOption} onChange={handleOptionChange}>
             <option value="allProducts">All Products</option>
             <option value="allSuppliers">All Suppliers</option>
           </select>
-      </Card>
-
-      <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}>
-      <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
+        </Card>
+        <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}>
+          <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by {selectedOption === "allProducts" ? "Product Code" : "Supplier Code"}</label>
             <Menu open={!!searchTerm} handler={setSearchTerm}>
               <MenuHandler>
@@ -151,19 +154,11 @@ export function Home() {
               </MenuList>
             </Menu>
           </div>
-      </Card>
-
-      <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
-      
-      <div className="flex-1 mt-3 ml-2">
-            <label className="block text-sm font-medium text-black mb-2">
-              View Count
-            </label>
-            <select
-              className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600"
-              value={viewCount}
-              onChange={(e) => setViewCount(e.target.value)}
-            > 
+        </Card>
+        <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
+          <div className="flex-1 mt-3 ml-2">
+            <label className="block text-sm font-medium text-black mb-2">View Count</label>
+            <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600" value={viewCount} onChange={(e) => setViewCount(e.target.value)}>
               <option value={1}>1</option>
               <option value={2}>2</option>
               <option value={3}>3</option>
@@ -176,53 +171,25 @@ export function Home() {
               <option value={10}>10</option>
             </select>
           </div>
-          <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">
-            Based On
-          </label>
+          <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
           <div className="flex items-center space-x-6 ml-2 mb-2">
             <div>
-              <input
-                className="mr-1"
-                type="radio"
-                id="value"
-                name="basedOn"
-                value="value"
-                checked={basedOn === 'value'}
-                onChange={(e) => setBasedOn(e.target.value)}
-              />
+              <input className="mr-1" type="radio" id="value" name="basedOn" value="value" checked={basedOn === 'value'} onChange={(e) => setBasedOn(e.target.value)} />
               <label htmlFor="value" className="text-black">Value</label>
             </div>
             <div>
-              <input
-                className="mr-1"
-                type="radio"
-                id="qty"
-                name="basedOn"
-                value="qty"
-                checked={basedOn === 'qty'}
-                onChange={(e) => setBasedOn(e.target.value)}
-              />
+              <input className="mr-1" type="radio" id="qty" name="basedOn" value="qty" checked={basedOn === 'qty'} onChange={(e) => setBasedOn(e.target.value)} />
               <label htmlFor="qty" className="text-black">Quantity</label>
             </div>
             <div>
-              <input
-                className="mr-1"
-                type="radio"
-                id="count"
-                name="basedOn"
-                value="count"
-                checked={basedOn === 'count'}
-                onChange={(e) => setBasedOn(e.target.value)}
-              />
+              <input className="mr-1" type="radio" id="count" name="basedOn" value="count" checked={basedOn === 'count'} onChange={(e) => setBasedOn(e.target.value)} />
               <label htmlFor="count" className="text-black">Count</label>
             </div>
           </div>
-      </Card>
+        </Card>
       </div>
-      <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4 ">
-        
-        {statisticsCardsData.map(({ icon, title, footer,from,to,product,based_on,showDatePickers,showCustomFields,showOrderStats,showProductStats,showMostPurchaseProductSupplier,backgroundColor, ...rest }) => (
-        
+      <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+        {statisticsCardsData.map(({ icon, title, footer, from, to, product, based_on, showDatePickers, showCustomFields, showOrderStats, showProductStats, showMostPurchaseProductSupplier, backgroundColor, ...rest }) => (
           <StatisticsCard
             key={title}
             {...rest}
@@ -232,45 +199,39 @@ export function Home() {
             backgroundColor={backgroundColor}
             showDatePickers={showDatePickers}
             based_on={based_on}
-            icon={React.createElement(icon, {
-              className: "w-6 h-6 text-white",
-            })}
+            icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
             showCustomFields={showCustomFields}
             showOrderStats={showOrderStats}
             showProductStats={showProductStats}
             showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
+            card3Content={card3Content}
+            card4Content={card4Content}
+            tableData={tableData}
+            selectedOption={selectedOption}
           />
         ))}
       </div>
-
       <div className="mb-3 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
             key={props.title}
             {...props}
-            footer={
-              <Typography
-                variant="small"
-                className="flex items-center font-normal text-blue-gray-600"
-              >
-                &nbsp;{props.footer}
-              </Typography>
-            }
+            footer={<Typography variant="small" className="flex items-center font-normal text-blue-gray-600">&nbsp;{props.footer}</Typography>}
           />
         ))}
       </div>
       {chartData && (
-          <StatisticsChart
-            chart={{
-              type: 'pie',
-              height: 220,
-              series: chartData.series,
-              options: chartData.options,
-            }}
-            title="Product Purchase Audit"
-            description="Shows the audit of product purchases"
-          />
-        )}
+        <StatisticsChart
+          chart={{
+            type: 'pie',
+            height: 220,
+            series: chartData.series,
+            options: chartData.options,
+          }}
+          title="Product Purchase Audit"
+          description="Shows the audit of product purchases"
+        />
+      )}
     </div>
   );
 }
