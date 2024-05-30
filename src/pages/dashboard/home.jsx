@@ -15,12 +15,16 @@ import {
   statisticsChartsData,
 } from "@/data";
 import axios from "axios";
+import moment from "moment";
 
 export function Home() {
+  const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');  
+  const currentToDate = moment().endOf('day').format('YYYY-MM-DD');
+
   const [selectedOption, setSelectedOption] = useState("allProducts");
   const [searchTerm, setSearchTerm] = useState("");
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [fromDate, setFromDate] = useState(currentFromDate);
+  const [toDate, setToDate] = useState(currentToDate);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [basedOn, setBasedOn] = useState('value');
@@ -32,14 +36,16 @@ export function Home() {
   const [tableData, setTableData] = useState([]);
   const [filteredTableData, setFilteredTableData] = useState([]);
 
+  
   useEffect(() => {
     fetchProducts(selectedOption);
     updateCardContents(selectedOption);
-  }, [selectedOption]);
-
-  useEffect(() => {
     filterTableData();
-  }, [tableData, viewCount]);
+    if (fromDate && toDate && products && basedOn && viewCount) {
+      fetchData();
+    }
+  }, [selectedOption,tableData, viewCount,fromDate,toDate, toDate, products, basedOn, viewCount]);
+
 
   const fetchProducts = async (option) => {
     try {
@@ -89,12 +95,7 @@ export function Home() {
     }
   };
 
-  useEffect(() => {
-    if (fromDate && toDate && products && basedOn && viewCount) {
-      fetchData();
-    }
-  }, [fromDate, toDate, products, basedOn, viewCount]);
-
+  
   const handleOptionChange = (e) => {
     setSelectedOption(e.target.value);
     setSearchTerm(""); 
