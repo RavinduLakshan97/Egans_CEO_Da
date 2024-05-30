@@ -84,14 +84,14 @@ export function DashboardNavbar() {
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
           <Link to="/auth/sign-in">
-            <Button
+            {/* <Button
               variant="text"
               color="blue-gray"
               className="hidden items-center gap-1 px-4 xl:flex normal-case"
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
               Sign In
-            </Button>
+            </Button> */}
             <IconButton
               variant="text"
               color="blue-gray"
@@ -106,7 +106,7 @@ export function DashboardNavbar() {
                 <BellIcon className="h-5 w-5 text-blue-gray-500" />
               </IconButton>
             </MenuHandler>
-            <MenuList className="w-max border-0">
+            {/* <MenuList className="w-max border-0">
               <MenuItem className="flex items-center gap-3">
                 <Avatar
                   src="https://demos.creative-tim.com/material-dashboard/assets/img/team-2.jpg"
@@ -176,7 +176,7 @@ export function DashboardNavbar() {
                   </Typography>
                 </div>
               </MenuItem>
-            </MenuList>
+            </MenuList> */}
           </Menu>
           <IconButton
             variant="text"
