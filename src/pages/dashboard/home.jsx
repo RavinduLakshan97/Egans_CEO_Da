@@ -21,7 +21,7 @@ export function Home() {
   const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');  
   const currentToDate = moment().endOf('day').format('YYYY-MM-DD');
 
-  const [selectedOption, setSelectedOption] = useState("allProducts");
+  const [selectedOption, setSelectedOption] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [fromDate, setFromDate] = useState(currentFromDate);
   const [toDate, setToDate] = useState(currentToDate);
@@ -37,14 +37,23 @@ export function Home() {
   const [filteredTableData, setFilteredTableData] = useState([]);
 
   
+  
+
   useEffect(() => {
     fetchProducts(selectedOption);
     updateCardContents(selectedOption);
+  }, [selectedOption]);
+
+  useEffect(() => {
     filterTableData();
+  }, [tableData, viewCount]);
+
+
+  useEffect(() => {
     if (fromDate && toDate && products && basedOn && viewCount) {
       fetchData();
     }
-  }, [selectedOption,tableData, viewCount,fromDate,toDate, toDate, products, basedOn, viewCount]);
+  }, [fromDate, toDate, products, basedOn, viewCount]);
 
 
   const fetchProducts = async (option) => {
