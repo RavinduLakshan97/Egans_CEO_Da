@@ -25,6 +25,8 @@ const websiteViewsChart = {
   },
 };
 
+
+
 const dailySalesChart = {
   type: "line",
   height: 220,
@@ -60,40 +62,6 @@ const dailySalesChart = {
   },
 };
 
-// const completedTaskChart = {
-//   type: "line",
-//   height: 220,
-//   series: [
-//     {
-//       name: "Sales",
-//       data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
-//     },
-//   ],
-//   options: {
-//     ...chartsConfig,
-//     colors: ["#388e3c"],
-//     stroke: {
-//       lineCap: "round",
-//     },
-//     markers: {
-//       size: 5,
-//     },
-//     xaxis: {
-//       ...chartsConfig.xaxis,
-//       categories: [
-//         "Apr",
-//         "May",
-//         "Jun",
-//         "Jul",
-//         "Aug",
-//         "Sep",
-//         "Oct",
-//         "Nov",
-//         "Dec",
-//       ],
-//     },
-//   },
-// };
 
 
 const completedTasksChart = (data) => ({

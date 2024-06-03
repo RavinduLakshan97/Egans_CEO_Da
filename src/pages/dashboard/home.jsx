@@ -13,15 +13,111 @@ import {
 } from "@material-tailwind/react";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
-import {
-  statisticsCardsData,
-  statisticsChartsData,
-} from "@/data";
+import { statisticsCardsData } from "@/data";
 import axios from "axios";
 import moment from "moment";
 import Chart from "react-apexcharts"; // Ensure this import is present
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css'; // Import CSS for Slider
+
+const chartsConfig = {
+  // Add your chartsConfig settings here
+};
+
+const websiteViewsChart = {
+  type: "bar",
+  height: 220,
+  series: [
+    {
+      name: "Purchases",
+      data: [45, 20, 10, 22, 30, 10, 40],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: "#388e3c",
+    plotOptions: {
+      bar: {
+        columnWidth: "16%",
+        borderRadius: 5,
+      },
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: ["Steve", "Alex", "Cathy", "Peter", "Morgan", "John", "Sarah"],
+    },
+  },
+};
+
+const dailySalesChart = {
+  type: "line",
+  height: 220,
+  series: [
+    {
+      name: "Purchases",
+      data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: ["#0288d1"],
+    stroke: {
+      lineCap: "round",
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: [
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+    },
+  },
+};
+
+const completedTasksChart = (data) => ({
+  type: "pie",
+  height: 220,
+  series: data.series,
+  options: {
+    ...chartsConfig,
+    colors: ["#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#FFCD56", "#C9CBCF", "#36A2EB"],
+    labels: data.labels,
+  },
+});
+
+const statisticsChartsData = [
+  {
+    color: "white",
+    title: "Best Buy Supplier",
+    description: "",
+    footer: "",
+    chart: websiteViewsChart,
+  },
+  {
+    color: "white",
+    title: "Average prices for the period",
+    description: "",
+    footer: "updated 4 min ago",
+    chart: dailySalesChart,
+  },
+  {
+    color: "white",
+    title: "Product Purchase Audit",
+    description: "",
+    footer: "just updated",
+    chart: completedTasksChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),  
+  },
+];
 
 export function Home() {
   const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');  
@@ -175,7 +271,7 @@ export function Home() {
           case 'week':
             const currentWeek = now.isoWeek();
             for (let i = 0; i < currentWeek; i++) {
-              categories.push(`Week ${now.subtract(i, 'weeks').isoWeek()}`);
+              categories.push(`Week ${now.clone().subtract(i, 'weeks').isoWeek()}`);
               seriesData.push(Math.floor(Math.random() * 500) + 100); // Random data
             }
             categories.reverse();
@@ -203,7 +299,7 @@ export function Home() {
     const { categories, seriesData } = generatePriceHikeData(timeFrame);
 
     const newChartData = {
-      series: [{ name: "Sales", data: seriesData }],
+      series: [{ name: "Purchases", data: seriesData }],
       options: {
         ...priceHikeChartData.options,
         xaxis: {
@@ -342,7 +438,7 @@ export function Home() {
             options: chartData.options,
           }}
           title="Product Purchase Audit"
-          description="Shows the audit of product purchases"
+          description=""
         />
       )}
       <Card className="border border-blue-gray-100 shadow-sm">
