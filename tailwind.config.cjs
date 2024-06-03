@@ -10,6 +10,7 @@ module.exports = withMT({
         'custom-red':'#CFE1B9',
         'custom-green':'#F2E9E4',
         'custom-yellow':'#CFDBD5',
+        'custom-purple':'#cdb4db',
       },
     },
   },

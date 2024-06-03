@@ -50,7 +50,7 @@ export const statisticsCardsData = [
   },
   {
     showMostPurchaseProductSupplier: true,
-    backgroundColor: "bg-custom-red",
+    backgroundColor: "bg-custom-purple",
   }
   
 ];
