@@ -81,21 +81,18 @@ export const statisticsChartsData = [
     color: "white",
     title: "Best Buy Supplier",
     description: "",
-    footer: "",
     chart: websiteViewsChart,
   },
   {
     color: "white",
     title: "Average prices for the period",
     description: "",
-    footer: "updated 4 min ago",
     chart: dailySalesChart,
   },
   {
     color: "white",
     title: "Product Purchase Audit",
     description: "Shows the audit of product purchases",
-    footer: "just updated",
     chart: completedTasksChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),  
   },
 ];

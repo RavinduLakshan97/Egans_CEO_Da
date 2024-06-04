@@ -16,12 +16,12 @@ import { StatisticsChart } from "@/widgets/charts";
 import { statisticsCardsData } from "@/data";
 import axios from "axios";
 import moment from "moment";
-import Chart from "react-apexcharts"; 
+import Chart from "react-apexcharts";
 import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css'; 
+import 'rc-slider/assets/index.css';
 
 const chartsConfig = {
-  
+  // Add your chartsConfig settings here
 };
 
 const websiteViewsChart = {
@@ -85,7 +85,7 @@ const dailySalesChart = {
 };
 
 const completedTasksChart = (data) => ({
-  type: "pie",
+  type: "donut",
   height: 220,
   series: data.series,
   options: {
@@ -115,12 +115,12 @@ const statisticsChartsData = [
     title: "Product Purchase Audit",
     description: "",
     footer: "just updated",
-    chart: completedTasksChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),  
+    chart: completedTasksChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
   },
 ];
 
 export function Home() {
-  const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');  
+  const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');
   const currentToDate = moment().endOf('day').format('YYYY-MM-DD');
 
   const [selectedOption, setSelectedOption] = useState("");
@@ -138,7 +138,6 @@ export function Home() {
   const [tableData, setTableData] = useState([]);
   const [filteredTableData, setFilteredTableData] = useState([]);
 
-  // New state for managing selected time frame
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('year');
   const [priceHikeChartData, setPriceHikeChartData] = useState(statisticsChartsData[1].chart);
 
@@ -183,9 +182,9 @@ export function Home() {
     const isBasedOnInvoiceCount = basedOn === 'count';
     const isBasedOnValue = basedOn === 'value';
     const isBasedOnQty = basedOn === 'qty';
-    
+
     const url = `{API_URL}api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${products}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
-    
+
     try {
       const response = await axios.get(url);
       const data = response.data.dashboardModels;
@@ -211,7 +210,7 @@ export function Home() {
 
   const handleOptionChange = (e) => {
     setSelectedOption(e.target.value);
-    setSearchTerm(""); 
+    setSearchTerm("");
     fetchProducts(e.target.value);
     updateCardContents(e.target.value);
   };
@@ -251,72 +250,92 @@ export function Home() {
       { name: "Product B", data: [] },
       { name: "Product C", data: [] },
     ];
-  
+    let tooltipLabels = [];
+
     switch (timeFrame) {
       case 'year':
         for (let i = 0; i < 5; i++) {
           categories.push(now.clone().subtract(i, 'years').format('YYYY'));
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
+          tooltipLabels.push(now.clone().subtract(i, 'years').format('YYYY'));
         }
         categories.reverse();
         seriesData.forEach(series => series.data.reverse());
+        tooltipLabels.reverse();
         break;
-  
+
       case 'month':
         const currentMonth = now.month(); // 0-11
         for (let i = currentMonth; i >= 0; i--) {
           categories.push(now.month(i).format('MMM'));
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
+          tooltipLabels.push(now.month(i).format('MMM'));
         }
         categories.reverse();
         seriesData.forEach(series => series.data.reverse());
+        tooltipLabels.reverse();
         break;
-  
+
       case 'week':
         const currentWeek = now.isoWeek();
         for (let i = 0; i < currentWeek; i++) {
           categories.push(`Week ${now.clone().subtract(i, 'weeks').isoWeek()}`);
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
+          tooltipLabels.push(now.clone().subtract(i, 'weeks').format('MMM'));
         }
         categories.reverse();
         seriesData.forEach(series => series.data.reverse());
+        tooltipLabels.reverse();
         break;
-  
+
       case 'day':
         for (let i = 0; i < 7; i++) {
           categories.push(now.clone().subtract(i, 'days').format('ddd'));
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
+          tooltipLabels.push(now.clone().subtract(i, 'days').format('MMM'));
         }
         categories.reverse();
         seriesData.forEach(series => series.data.reverse());
+        tooltipLabels.reverse();
         break;
-  
+
       default:
         break;
     }
-  
-    return { categories, seriesData };
+
+    return { categories, seriesData, tooltipLabels };
   };
-  
 
   const updatePriceHikeChart = (timeFrame) => {
-    const { categories, seriesData } = generatePriceHikeData(timeFrame);
+    const { categories, seriesData, tooltipLabels } = generatePriceHikeData(timeFrame);
 
     const newChartData = {
       series: seriesData,
       options: {
         ...priceHikeChartData.options,
-        colors: ["#FFCE56", "#4BC0C0", "#9966FF"], 
+        colors: ["#FFCE56", "#4BC0C0", "#9966FF"],
         xaxis: {
           categories: categories,
+        },
+        tooltip: {
+          custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+            const month = tooltipLabels[dataPointIndex];
+            //const week = w.globals.labels[dataPointIndex];
+            return `<div class="arrow_box">
+                      <span>${month}</span>
+                      <br/>
+                      <label>Purchases: </label>
+                      <span>${series[seriesIndex][dataPointIndex]}</span>
+                    </div>`;
+          },
         },
       },
     };
@@ -384,8 +403,8 @@ export function Home() {
               className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100" 
               min={1}
               max={5}
-              aria-label="Default"
               valueLabelDisplay="auto"
+              keyboard
               value={viewCount}
               onChange={value => setViewCount(value)}
               // marks={{
