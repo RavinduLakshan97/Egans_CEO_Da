@@ -16,12 +16,12 @@ import { StatisticsChart } from "@/widgets/charts";
 import { statisticsCardsData } from "@/data";
 import axios from "axios";
 import moment from "moment";
-import Chart from "react-apexcharts"; // Ensure this import is present
+import Chart from "react-apexcharts"; 
 import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css'; // Import CSS for Slider
+import 'rc-slider/assets/index.css'; 
 
 const chartsConfig = {
-  // Add your chartsConfig settings here
+  
 };
 
 const websiteViewsChart = {
@@ -246,45 +246,57 @@ export function Home() {
   const generatePriceHikeData = (timeFrame) => {
     const now = moment();
     let categories = [];
-    let seriesData = [];
+    let seriesData = [
+      { name: "Product A", data: [] },
+      { name: "Product B", data: [] },
+      { name: "Product C", data: [] },
+    ];
   
     switch (timeFrame) {
       case 'year':
         for (let i = 0; i < 5; i++) {
           categories.push(now.clone().subtract(i, 'years').format('YYYY'));
-          seriesData.push(Math.floor(Math.random() * 500) + 100); // Random data
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
         }
         categories.reverse();
-        seriesData.reverse();
+        seriesData.forEach(series => series.data.reverse());
         break;
   
-        case 'month':
-          const currentMonth = now.month(); // 0-11
-          for (let i = currentMonth; i >= 0; i--) {
-            categories.push(now.month(i).format('MMM'));
-            seriesData.push(Math.floor(Math.random() * 500) + 100); // Random data
-          }
-          categories.reverse();
-          seriesData.reverse();
-          break;
+      case 'month':
+        const currentMonth = now.month(); // 0-11
+        for (let i = currentMonth; i >= 0; i--) {
+          categories.push(now.month(i).format('MMM'));
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
+        }
+        categories.reverse();
+        seriesData.forEach(series => series.data.reverse());
+        break;
   
-          case 'week':
-            const currentWeek = now.isoWeek();
-            for (let i = 0; i < currentWeek; i++) {
-              categories.push(`Week ${now.clone().subtract(i, 'weeks').isoWeek()}`);
-              seriesData.push(Math.floor(Math.random() * 500) + 100); // Random data
-            }
-            categories.reverse();
-            seriesData.reverse();
-            break;
+      case 'week':
+        const currentWeek = now.isoWeek();
+        for (let i = 0; i < currentWeek; i++) {
+          categories.push(`Week ${now.clone().subtract(i, 'weeks').isoWeek()}`);
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
+        }
+        categories.reverse();
+        seriesData.forEach(series => series.data.reverse());
+        break;
   
       case 'day':
         for (let i = 0; i < 7; i++) {
           categories.push(now.clone().subtract(i, 'days').format('ddd'));
-          seriesData.push(Math.floor(Math.random() * 500) + 100); // Random data
+          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100); 
+          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100); 
         }
         categories.reverse();
-        seriesData.reverse();
+        seriesData.forEach(series => series.data.reverse());
         break;
   
       default:
@@ -299,9 +311,10 @@ export function Home() {
     const { categories, seriesData } = generatePriceHikeData(timeFrame);
 
     const newChartData = {
-      series: [{ name: "Purchases", data: seriesData }],
+      series: seriesData,
       options: {
         ...priceHikeChartData.options,
+        colors: ["#FFCE56", "#4BC0C0", "#9966FF"], 
         xaxis: {
           categories: categories,
         },
@@ -367,16 +380,25 @@ export function Home() {
         <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
           <div className="flex-1 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2">View Count</label>
-            <Slider
+             <Slider
               className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100" 
               min={1}
               max={5}
+              aria-label="Default"
+              valueLabelDisplay="auto"
               value={viewCount}
               onChange={value => setViewCount(value)}
+              // marks={{
+              //   1: '1',
+              //   2: '2',
+              //   3: '3',
+              //   4: '4',
+              //   5: '5',
+              // }}
               trackStyle={customSliderStyles.trackStyle}
               handleStyle={customSliderStyles.handleStyle}
               railStyle={customSliderStyles.railStyle}
-            />
+            /> 
           </div>
           <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
           <div className="flex items-center space-x-6 ml-2 mb-2">
