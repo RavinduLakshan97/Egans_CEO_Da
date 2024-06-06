@@ -63,6 +63,7 @@ const dailySalesChart = {
     colors: ["#0288d1"],
     stroke: {
       lineCap: "round",
+      curve: 'smooth',
     },
     markers: {
       size: 5,
@@ -300,7 +301,7 @@ export function Home() {
           seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
           seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
           seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
-          tooltipLabels.push(now.clone().subtract(i, 'days').format('MMM'));
+          tooltipLabels.push(now.clone().subtract(i, 'days').format('dddd'));
         }
         categories.reverse();
         seriesData.forEach(series => series.data.reverse());
@@ -314,29 +315,53 @@ export function Home() {
     return { categories, seriesData, tooltipLabels };
   };
 
+  const getHoverContent = (seriesIndex, dataPointIndex, series) => {
+    const month = moment().isoWeek(dataPointIndex + 1).format('MMM');
+    const day = moment().isoWeek(dataPointIndex + 1).day(dataPointIndex).format('dddd');
+    const year = moment().subtract(dataPointIndex, 'years').format('YYYY');
+    
+    let content = '';
+    if (selectedTimeFrame === 'day') {
+      content = `<div class="arrow_box">
+          <span>${day}</span>
+          <br/>
+          <label>Purchases: </label>
+          <span>${series[seriesIndex][dataPointIndex]}</span>
+        </div>`;
+    } else if (selectedTimeFrame === 'week' || selectedTimeFrame === 'month') {
+      content = `<div class="arrow_box">
+          <span>${month}</span>
+          <br/>
+          <label>Purchases: </label>
+          <span>${series[seriesIndex][dataPointIndex]}</span>
+        </div>`;
+    } else if (selectedTimeFrame === 'year') {
+      content = `<div class="arrow_box">
+          <span>${year}</span>
+          <br/>
+          <label>Purchases: </label>
+          <span>${series[seriesIndex][dataPointIndex]}</span>
+        </div>`;
+    }
+    return content;
+  };
+
   const updatePriceHikeChart = (timeFrame) => {
-    const { categories, seriesData, tooltipLabels } = generatePriceHikeData(timeFrame);
+    const { categories, seriesData } = generatePriceHikeData(timeFrame);
 
     const newChartData = {
       series: seriesData,
       options: {
         ...priceHikeChartData.options,
-        colors: ["#FFCE56", "#4BC0C0", "#9966FF"],
+        colors: ["#FFCE56", "#4BC0C0", "#9966FF"], 
         xaxis: {
           categories: categories,
         },
         tooltip: {
-          custom: ({ series, seriesIndex, dataPointIndex, w }) => {
-            const month = tooltipLabels[dataPointIndex];
-            //const week = w.globals.labels[dataPointIndex];
-            return `<div class="arrow_box">
-                      <span>${month}</span>
-                      <br/>
-                      <label>Purchases: </label>
-                      <span>${series[seriesIndex][dataPointIndex]}</span>
-                    </div>`;
-          },
-        },
+          custom: ({ seriesIndex, dataPointIndex, w }) => {
+            return getHoverContent(seriesIndex, dataPointIndex, w.globals.series);
+          }
+        }
       },
     };
 
@@ -516,9 +541,6 @@ export function Home() {
           <Typography variant="h6" color="blue-gray">
           Average prices for the period
           </Typography>
-          {/* <Typography variant="small" className="font-normal text-blue-gray-600">
-            View the price hike data based on selected time frame.
-          </Typography> */}
         </CardBody>
       </Card>
     </div>
