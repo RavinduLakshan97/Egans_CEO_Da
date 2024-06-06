@@ -22,7 +22,7 @@ import 'rc-slider/assets/index.css';
 import { chartsConfig } from "@/configs";
 
 
-const websiteViewsChart = {
+const bestBuySupplierChart = {
   type: "bar",
   height: 220,
   series: [
@@ -47,7 +47,7 @@ const websiteViewsChart = {
   },
 };
 
-const dailySalesChart = {
+const priceHikeChart = {
   type: "line",
   height: 220,
   series: [
@@ -83,7 +83,7 @@ const dailySalesChart = {
   },
 };
 
-const completedTasksChart = (data) => ({
+const productPurchaseAuditChart = (data) => ({
   type: "donut",
   height: 220,
   series: data.series,
@@ -99,22 +99,19 @@ const statisticsChartsData = [
     color: "white",
     title: "Best Buy Supplier",
     description: "",
-    footer: "",
-    chart: websiteViewsChart,
+    chart: bestBuySupplierChart,
   },
   {
     color: "white",
     title: "Average prices for the period",
     description: "",
-    footer: "updated 4 min ago",
-    chart: dailySalesChart,
+    chart: priceHikeChart,
   },
   {
     color: "white",
     title: "Product Purchase Audit",
     description: "",
-    footer: "just updated",
-    chart: completedTasksChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
+    chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
   },
 ];
 
