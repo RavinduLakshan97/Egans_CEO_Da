@@ -14,7 +14,7 @@ export function StatisticsCard({ color, icon, title, value, footer, from, to, pr
     // Fetch dates from API and set the state
     const fetchDates = async () => {
       try {
-        const response = await axios.get('API_URL'); // Replace 'API_URL' with your actual API endpoint
+        const response = await axios.get('API_URL'); 
         setHighestPriceDate(response.data.highestPriceDate);
         setLowestPriceDate(response.data.lowestPriceDate);
       } catch (error) {
