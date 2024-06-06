@@ -45,6 +45,11 @@ export const chartsConfig = {
         show: true,
       },
     },
+    yaxis: {
+      lines: {
+        show: true,
+      },
+    },
     padding: {
       top: 5,
       right: 20,

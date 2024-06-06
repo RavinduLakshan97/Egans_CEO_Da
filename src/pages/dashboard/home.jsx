@@ -19,10 +19,8 @@ import moment from "moment";
 import Chart from "react-apexcharts";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import { chartsConfig } from "@/configs";
 
-const chartsConfig = {
-  // Add your chartsConfig settings here
-};
 
 const websiteViewsChart = {
   type: "bar",
