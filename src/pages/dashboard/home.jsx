@@ -118,6 +118,7 @@ export function Home() {
   const [lowestPrice, setLowestPrice] = useState("");
   const [lowestPriceDate, setLowestPriceDate] = useState("");
   const [averagePriceQTY, setAveragePriceQTY] = useState("");
+  const [totalNoOfOrders,setTotalNoOfOrders] = useState("");
 
   const [card3Content, setCard3Content] = useState("");
   const [card4Content, setCard4Content] = useState("");
@@ -173,12 +174,14 @@ export function Home() {
     const bestSupplierUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
     const analyticsPriceUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getanalyticspriceforproduct?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&viewCount=${viewCount}`;
     const avgPurchaseQtyUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getaveragepurchasequantity?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}`;
+    const totalOrdersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/gettotalnooforders?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}`;
   
     try {
-      const [bestSupplierResponse, analyticsPriceResponse, avgPurchaseQtyResponse] = await Promise.all([
+      const [bestSupplierResponse, analyticsPriceResponse, avgPurchaseQtyResponse, totalOrdersResponse] = await Promise.all([
         axios.get(bestSupplierUrl),
         axios.get(analyticsPriceUrl),
-        axios.get(avgPurchaseQtyUrl)
+        axios.get(avgPurchaseQtyUrl),
+        axios.get(totalOrdersUrl)
       ]);
   
       // Handle best supplier data
@@ -206,6 +209,10 @@ export function Home() {
       // Handle average purchase quantity data
       const avgPurchaseQtyData = avgPurchaseQtyResponse.data.avgPurchaseQty[0];
       setAveragePriceQTY(avgPurchaseQtyData.avgPurchaseQty.toFixed(2));
+  
+      // Handle total orders data
+      const totalOrdersData = totalOrdersResponse.data.totNoOfOrders[0];
+      setTotalNoOfOrders(totalOrdersData.totalOrders);
   
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -482,6 +489,7 @@ export function Home() {
             lowest_price={lowestPrice}
             lowest_price_date={lowestPriceDate}
             average_price_quantity={averagePriceQTY}
+            total_no_of_orders={totalNoOfOrders}
           />
         ))}
       </div>
