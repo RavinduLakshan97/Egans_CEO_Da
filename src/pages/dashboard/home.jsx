@@ -109,6 +109,14 @@ export function Home() {
   const [basedOn, setBasedOn] = useState('value');
   const [viewCount, setViewCount] = useState(3);
   const [chartData, setChartData] = useState(null);
+  const [bestBuySupplierChartState, setBestBuySupplierChartState] = useState(bestBuySupplierChart);
+
+  // New state variables for the new API data
+  const [averagePrice, setAveragePrice] = useState("");
+  const [highestPrice, setHighestPrice] = useState("");
+  const [highestPriceDate, setHighestPriceDate] = useState("");
+  const [lowestPrice, setLowestPrice] = useState("");
+  const [lowestPriceDate, setLowestPriceDate] = useState("");
 
   const [card3Content, setCard3Content] = useState("");
   const [card4Content, setCard4Content] = useState("");
@@ -128,8 +136,9 @@ export function Home() {
   }, [tableData, viewCount]);
 
   useEffect(() => {
-    if (fromDate && toDate && products && basedOn && viewCount) {
+    if (fromDate && toDate && products.length > 0 && basedOn && viewCount) {
       fetchData();
+      fetchAnalyticalData();
     }
   }, [fromDate, toDate, products, basedOn, viewCount]);
 
@@ -161,28 +170,41 @@ export function Home() {
     const isBasedOnValue = basedOn === 'value';
     const isBasedOnQty = basedOn === 'qty';
 
-    const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${products.map(p => p.value)}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
+    const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
 
     try {
       const response = await axios.get(url);
       const data = response.data.dashboardModels;
-      const labels = data.map(item => item.supplierCode);
-      const values = data.map(item => {
-        if (basedOn === 'value') return item.totalAmount;
-        if (basedOn === 'qty') return item.totalQuantity;
-        if (basedOn === 'count') return item.invoiceCount;
-        return 0;
-      });
+      const categories = data.map(item => item.supplierCode);
+      const series = data.map(item => item.totalAmount);
 
-      setChartData({
-        series: values,
+      setBestBuySupplierChartState({
+        ...bestBuySupplierChartState,
+        series: [{ name: "Purchases", data: series }],
         options: {
-          labels: labels,
-          colors: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"],
+          ...bestBuySupplierChartState.options,
+          xaxis: { categories },
         },
       });
     } catch (error) {
       console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchAnalyticalData = async () => {
+    const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getanalyticspriceforproduct?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&viewCount=${viewCount}`;
+
+    try {
+      const response = await axios.get(url);
+      const data = response.data.DashboardPrices[0]; // Assume we take the first one for simplicity
+
+      setAveragePrice(data.avgPrice.toFixed(2));
+      setHighestPrice(data.maxPrice);
+      setHighestPriceDate(data.maxPriceDate);
+      setLowestPrice(data.minPrice);
+      setLowestPriceDate(data.minPriceDate);
+    } catch (error) {
+      console.error("Error fetching analytics price for product:", error);
     }
   };
 
@@ -450,6 +472,11 @@ export function Home() {
             card4Content={card4Content}
             tableData={filteredTableData}
             selectedOption={selectedOption}
+            average_price={averagePrice}
+            highest_price={highestPrice}
+            highest_price_date={highestPriceDate}
+            lowest_price={lowestPrice}
+            lowest_price_date={lowestPriceDate}
           />
         ))}
       </div>
