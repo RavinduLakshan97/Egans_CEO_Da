@@ -136,9 +136,8 @@ export function Home() {
   }, [tableData, viewCount]);
 
   useEffect(() => {
-    if (fromDate && toDate && products.length > 0 && basedOn && viewCount) {
+    if (fromDate && toDate && products && basedOn && viewCount) {
       fetchData();
-      fetchAnalyticalData();
     }
   }, [fromDate, toDate, products, basedOn, viewCount]);
 
@@ -170,14 +169,23 @@ export function Home() {
     const isBasedOnValue = basedOn === 'value';
     const isBasedOnQty = basedOn === 'qty';
 
-    const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
+    // replace hardcoded product code with setSearchTerm.value
+  
+    const bestSupplierUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
 
+    const analyticsPriceUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getanalyticspriceforproduct?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&viewCount=${viewCount}`;
+  
     try {
-      const response = await axios.get(url);
-      const data = response.data.dashboardModels;
-      const categories = data.map(item => item.supplierCode);
-      const series = data.map(item => item.totalAmount);
-
+      const [bestSupplierResponse, analyticsPriceResponse] = await Promise.all([
+        axios.get(bestSupplierUrl),
+        axios.get(analyticsPriceUrl)
+      ]);
+  
+      // Handle best supplier data
+      const bestSupplierData = bestSupplierResponse.data.dashboardModels;
+      const categories = bestSupplierData.map(item => item.supplierCode);
+      const series = bestSupplierData.map(item => item.totalAmount);
+  
       setBestBuySupplierChartState({
         ...bestBuySupplierChartState,
         series: [{ name: "Purchases", data: series }],
@@ -186,25 +194,17 @@ export function Home() {
           xaxis: { categories },
         },
       });
+  
+      // Handle analytics price data
+      const analyticsPriceData = analyticsPriceResponse.data.DashboardPrices[0];
+      setAveragePrice(analyticsPriceData.avgPrice.toFixed(2));
+      setHighestPrice(analyticsPriceData.maxPrice);
+      setHighestPriceDate(analyticsPriceData.maxPriceDate);
+      setLowestPrice(analyticsPriceData.minPrice);
+      setLowestPriceDate(analyticsPriceData.minPriceDate);
+  
     } catch (error) {
       console.error("Error fetching data:", error);
-    }
-  };
-
-  const fetchAnalyticalData = async () => {
-    const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getanalyticspriceforproduct?from=${fromDate}&to=${toDate}&productCode=${"6LABOURWS"}&viewCount=${viewCount}`;
-
-    try {
-      const response = await axios.get(url);
-      const data = response.data.DashboardPrices[0]; // Assume we take the first one for simplicity
-
-      setAveragePrice(data.avgPrice.toFixed(2));
-      setHighestPrice(data.maxPrice);
-      setHighestPriceDate(data.maxPriceDate);
-      setLowestPrice(data.minPrice);
-      setLowestPriceDate(data.minPriceDate);
-    } catch (error) {
-      console.error("Error fetching analytics price for product:", error);
     }
   };
 
