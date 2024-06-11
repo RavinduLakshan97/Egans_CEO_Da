@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
 import {
   Typography,
   Card,
@@ -20,7 +21,6 @@ import Chart from "react-apexcharts";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { chartsConfig } from "@/configs";
-
 
 const bestBuySupplierChart = {
   type: "bar",
@@ -50,9 +50,7 @@ const bestBuySupplierChart = {
 const priceHikeChart = {
   type: "line",
   height: 220,
-  series: [
-    
-  ],
+  series: [],
   options: {
     ...chartsConfig,
     colors: ["#0288d1"],
@@ -63,7 +61,6 @@ const priceHikeChart = {
     markers: {
       size: 5,
     },
-    
   },
 };
 
@@ -140,22 +137,23 @@ export function Home() {
     updatePriceHikeChart(selectedTimeFrame);
   }, [selectedTimeFrame]);
 
-  const fetchProducts = async (option) => {
+  const fetchProducts = async () => {
     try {
-      const url = `{API_URL}api/products?type=${option}`;
+      const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getallproducts`;
       const response = await axios.get(url);
-      setProducts(response.data);
-      setFilteredProducts(response.data);
+      const products = response.data.products.map((product) => ({
+        value: product.catlogCode,
+        label: product.catlogCode,
+      }));
+      setProducts(products);
+      setFilteredProducts(products);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
 
-  const handleSearchChange = (e) => {
-    const term = e.target.value;
-    setSearchTerm(term);
-    const filtered = products.filter(product => product.name.toLowerCase().includes(term.toLowerCase()));
-    setFilteredProducts(filtered);
+  const handleSearchChange = (selectedOption) => {
+    setSearchTerm(selectedOption);
   };
 
   const fetchData = async () => {
@@ -163,7 +161,7 @@ export function Home() {
     const isBasedOnValue = basedOn === 'value';
     const isBasedOnQty = basedOn === 'qty';
 
-    const url = `{API_URL}api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${products}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
+    const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${products.map(p => p.value)}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
 
     try {
       const response = await axios.get(url);
@@ -383,27 +381,19 @@ export function Home() {
         <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}>
           <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
-            <Menu open={!!searchTerm} handler={setSearchTerm}>
-              <MenuHandler>
-                <Input
-                  className="mb-3 bg-white border-blue-gray-100 shadow-sm px-4 rounded-lg"
-                  label="Search Product Code"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </MenuHandler>
-              <MenuList>
-                {filteredProducts.map((product, index) => (
-                  <MenuItem key={index}>{product.name}</MenuItem>
-                ))}
-              </MenuList>
-            </Menu>
+            <Select
+              className="mb-3"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              options={filteredProducts}
+              isClearable
+            />
           </div>
         </Card>
         <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
           <div className="flex-1 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2">View Count</label>
-             <Slider
+            <Slider
               className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100" 
               min={1}
               max={5}
@@ -421,7 +411,7 @@ export function Home() {
               trackStyle={customSliderStyles.trackStyle}
               handleStyle={customSliderStyles.handleStyle}
               railStyle={customSliderStyles.railStyle}
-            /> 
+            />
           </div>
           <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
           <div className="flex items-center space-x-6 ml-2 mb-2">
