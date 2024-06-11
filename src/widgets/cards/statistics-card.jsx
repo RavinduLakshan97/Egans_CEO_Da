@@ -102,7 +102,7 @@ export function StatisticsCard({
                 <thead>
                   <tr>
                     <th className="py-1 text-xs">{selectedOption === "allSuppliers" ? "Product Code" : "Supplier Code"}</th>
-                    <th className="py-1 text-xs">Description</th>
+                    <th className="py-1 text-xs">Toatal Supplied Amount</th>
                   </tr>
                 </thead>
                 <tbody>
