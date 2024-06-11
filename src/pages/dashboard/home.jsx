@@ -119,6 +119,7 @@ export function Home() {
   const [lowestPriceDate, setLowestPriceDate] = useState("");
   const [averagePriceQTY, setAveragePriceQTY] = useState("");
   const [totalNoOfOrders,setTotalNoOfOrders] = useState("");
+  const [bestBuyProducts, setBestBuyProducts] = useState([]);
 
   const [card3Content, setCard3Content] = useState("");
   const [card4Content, setCard4Content] = useState("");
@@ -176,63 +177,71 @@ export function Home() {
     const avgPurchaseQtyUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getaveragepurchasequantity?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
     const totalOrdersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/gettotalnooforders?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
     const mostSuppliedSuppliersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductmostsuppliedsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
-  
-    try {
-      const [
-        bestSupplierResponse,
-        analyticsPriceResponse,
-        avgPurchaseQtyResponse,
-        totalOrdersResponse,
-        mostSuppliedSuppliersResponse,
-      ] = await Promise.all([
-        axios.get(bestSupplierUrl),
-        axios.get(analyticsPriceUrl),
-        axios.get(avgPurchaseQtyUrl),
-        axios.get(totalOrdersUrl),
-        axios.get(mostSuppliedSuppliersUrl)
-      ]);
-  
-      // Handle best supplier data
-      const bestSupplierData = bestSupplierResponse.data.dashboardModels;
-      const categories = bestSupplierData.map(item => item.supplierCode);
-      const series = bestSupplierData.map(item => item.totalAmount);
-  
-      setBestBuySupplierChartState({
-        ...bestBuySupplierChartState,
-        series: [{ name: "Purchases", data: series }],
-        options: {
-          ...bestBuySupplierChartState.options,
-          xaxis: { categories },
-        },
-      });
-  
-      // Handle analytics price data
-      const analyticsPriceData = analyticsPriceResponse.data.DashboardPrices[0];
-      setAveragePrice(analyticsPriceData.avgPrice.toFixed(2));
-      setHighestPrice(analyticsPriceData.maxPrice);
-      setHighestPriceDate(analyticsPriceData.maxPriceDate);
-      setLowestPrice(analyticsPriceData.minPrice);
-      setLowestPriceDate(analyticsPriceData.minPriceDate);
-  
-      // Handle average purchase quantity data
-      const avgPurchaseQtyData = avgPurchaseQtyResponse.data.avgPurchaseQty[0];
-      setAveragePriceQTY(avgPurchaseQtyData.avgPurchaseQty.toFixed(2));
-  
-      // Handle total orders data
-      const totalOrdersData = totalOrdersResponse.data.totNoOfOrders[0];
-      setTotalNoOfOrders(totalOrdersData.totalOrders);
-  
-      // Handle most supplied suppliers data
-      const mostSuppliedSuppliersData = mostSuppliedSuppliersResponse.data.mostSuppliedSupplierss.map((supplier) => ({
-        code: supplier.supplierCode,
-        description: supplier.totalSupplied
-      }));
-      setTableData(mostSuppliedSuppliersData);
-  
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+    const bestBuyProductsUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestbuyproducts?from=${fromDate}&to=${toDate}&viewCount=5`;
+
+  try {
+    const [
+      bestSupplierResponse,
+      analyticsPriceResponse,
+      avgPurchaseQtyResponse,
+      totalOrdersResponse,
+      mostSuppliedSuppliersResponse,
+      bestBuyProductsResponse
+    ] = await Promise.all([
+      axios.get(bestSupplierUrl),
+      axios.get(analyticsPriceUrl),
+      axios.get(avgPurchaseQtyUrl),
+      axios.get(totalOrdersUrl),
+      axios.get(mostSuppliedSuppliersUrl),
+      axios.get(bestBuyProductsUrl)
+    ]);
+
+    // Handle best supplier data
+    const bestSupplierData = bestSupplierResponse.data.dashboardModels;
+    const categories = bestSupplierData.map(item => item.supplierCode);
+    const series = bestSupplierData.map(item => item.totalAmount);
+
+    setBestBuySupplierChartState({
+      ...bestBuySupplierChartState,
+      series: [{ name: "Purchases", data: series }],
+      options: {
+        ...bestBuySupplierChartState.options,
+        xaxis: { categories },
+      },
+    });
+
+    // Handle analytics price data
+    const analyticsPriceData = analyticsPriceResponse.data.DashboardPrices[0];
+    setAveragePrice(analyticsPriceData.avgPrice.toFixed(2));
+    setHighestPrice(analyticsPriceData.maxPrice);
+    setHighestPriceDate(analyticsPriceData.maxPriceDate);
+    setLowestPrice(analyticsPriceData.minPrice);
+    setLowestPriceDate(analyticsPriceData.minPriceDate);
+
+    // Handle average purchase quantity data
+    const avgPurchaseQtyData = avgPurchaseQtyResponse.data.avgPurchaseQty[0];
+    setAveragePriceQTY(avgPurchaseQtyData.avgPurchaseQty.toFixed(2));
+
+    // Handle total orders data
+    const totalOrdersData = totalOrdersResponse.data.totNoOfOrders[0];
+    setTotalNoOfOrders(totalOrdersData.totalOrders);
+
+    // Handle most supplied suppliers data
+    const mostSuppliedSuppliersData = mostSuppliedSuppliersResponse.data.mostSuppliedSupplierss.map((supplier) => ({
+      code: supplier.supplierCode,
+      description: supplier.totalSupplied
+    }));
+    setTableData(mostSuppliedSuppliersData);
+
+     // Handle best buy products data
+     const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
+     const highestProduct = bestBuyProducts.reduce((max, product) => product.OrderQty > max.OrderQty ? product : max, bestBuyProducts[0]);
+     setBestBuyProducts(highestProduct.catlogCode);
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
   
 
   const handleOptionChange = (e) => {
@@ -506,6 +515,7 @@ export function Home() {
             lowest_price_date={lowestPriceDate}
             average_price_quantity={averagePriceQTY}
             total_no_of_orders={totalNoOfOrders}
+            bestBuyProducts={bestBuyProducts}
           />
         ))}
       </div>
