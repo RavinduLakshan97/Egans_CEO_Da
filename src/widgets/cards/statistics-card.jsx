@@ -21,6 +21,7 @@ export function StatisticsCard({
   highest_price_date,
   lowest_price,
   lowest_price_date,
+  average_price_quantity,
   ...rest
 }) {
   return (
@@ -77,6 +78,7 @@ export function StatisticsCard({
               <input
                 type="text"
                 className="mt-1 block w-full xl:h-1/3 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
+                value={average_price_quantity}
               />
             </div>
             <div className="mb-4">
