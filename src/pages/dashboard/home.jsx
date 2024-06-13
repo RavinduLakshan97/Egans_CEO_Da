@@ -22,30 +22,32 @@ import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { chartsConfig } from "@/configs";
 
-const bestBuySupplierChart = {
-  type: "bar",
-  height: 220,
-  series: [
-    {
-      name: "Purchases",
-      data: [45, 20, 10, 22, 30, 10, 40],
-    },
-  ],
-  options: {
-    ...chartsConfig,
-    colors: "#388e3c",
-    plotOptions: {
-      bar: {
-        columnWidth: "16%",
-        borderRadius: 5,
+export function Home() {
+
+  const bestBuySupplierChartTemplate = {
+    type: "bar",
+    height: 220,
+    series: [
+      {
+        name: "Purchases",
+        data: [],
+      },
+    ],
+    options: {
+      ...chartsConfig,
+      colors: "#388e3c",
+      plotOptions: {
+        bar: {
+          columnWidth: "16%",
+          borderRadius: 5,
+        },
+      },
+      xaxis: {
+        ...chartsConfig.xaxis,
+        categories: [],
       },
     },
-    xaxis: {
-      ...chartsConfig.xaxis,
-      categories: ["Steve", "Alex", "Cathy", "Peter", "Morgan", "John", "Sarah"],
-    },
-  },
-};
+  };
 
 const priceHikeChart = {
   type: "line",
@@ -75,41 +77,40 @@ const productPurchaseAuditChart = (data) => ({
   },
 });
 
-const statisticsChartsData = [
-  {
-    color: "white",
-    title: "Best Buy Supplier",
-    description: "",
-    chart: bestBuySupplierChart,
-  },
-  {
-    color: "white",
-    title: "Average prices for the period",
-    description: "",
-    chart: priceHikeChart,
-  },
-  {
-    color: "white",
-    title: "Product Purchase Audit",
-    description: "",
-    chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
-  },
-];
+  const [statisticsChartsData, setStatisticsChartsData] = useState([
+    {
+      color: "white",
+      title: "Best Buy Supplier",
+      description: "",
+      chart: bestBuySupplierChartTemplate,
+    },
+    {
+      color: "white",
+      title: "Average prices for the period",
+      description: "",
+      chart: priceHikeChart,
+    },
+    {
+      color: "white",
+      title: "Product Purchase Audit",
+      description: "",
+      chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
+    },
+  ]);
 
-export function Home() {
   const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');
   const currentToDate = moment().endOf('day').format('YYYY-MM-DD');
 
   const [selectedOption, setSelectedOption] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(null);
   const [fromDate, setFromDate] = useState(currentFromDate);
   const [toDate, setToDate] = useState(currentToDate);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [basedOn, setBasedOn] = useState('value');
   const [viewCount, setViewCount] = useState(3);
-  const [chartData, setChartData] = useState(null);
-  const [bestBuySupplierChartState, setBestBuySupplierChartState] = useState(bestBuySupplierChart);
+  //const [chartData, setChartData] = useState(bestBuySupplierChartTemplate);
+  const [bestBuySupplierChartState, setBestBuySupplierChartState] = useState(bestBuySupplierChartTemplate);
 
   // New state variables for the new API data
   const [averagePrice, setAveragePrice] = useState("");
@@ -118,7 +119,7 @@ export function Home() {
   const [lowestPrice, setLowestPrice] = useState("");
   const [lowestPriceDate, setLowestPriceDate] = useState("");
   const [averagePriceQTY, setAveragePriceQTY] = useState("");
-  const [totalNoOfOrders,setTotalNoOfOrders] = useState("");
+  const [totalNoOfOrders, setTotalNoOfOrders] = useState("");
   const [bestBuyProducts, setBestBuyProducts] = useState([]);
 
   const [card3Content, setCard3Content] = useState("");
@@ -130,6 +131,21 @@ export function Home() {
   const [priceHikeChartData, setPriceHikeChartData] = useState(statisticsChartsData[1].chart);
 
   useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    if (fromDate && toDate && searchTerm && basedOn && viewCount) {
+      fetchData();
+      //fetchChartData();
+    }
+  }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
+
+  useEffect(() => {
+    fetchChartData();
+  }, []);
+
+  useEffect(() => {
     fetchProducts(selectedOption);
     updateCardContents(selectedOption);
   }, [selectedOption]);
@@ -137,12 +153,6 @@ export function Home() {
   useEffect(() => {
     filterTableData();
   }, [tableData, viewCount]);
-
-  useEffect(() => {
-    if (fromDate && toDate && products && basedOn && viewCount) {
-      fetchData();
-    }
-  }, [fromDate, toDate, products, basedOn, viewCount]);
 
   useEffect(() => {
     updatePriceHikeChart(selectedTimeFrame);
@@ -166,6 +176,55 @@ export function Home() {
   const handleSearchChange = (selectedOption) => {
     setSearchTerm(selectedOption);
   };
+
+  const fetchChartData = async () => {
+    try {
+      const response = await axios.get('https://dummy.restapiexample.com/api/v1/employees');
+  
+      const dummyData = response.data.data;
+  
+      // Sort employees by salary in descending order and select the top 5
+      const top5Employees = dummyData.sort((a, b) => b.employee_salary - a.employee_salary).slice(0, 5);
+  
+      const dummyCategories = top5Employees.map(item => item.employee_name);
+      const dummySeries = top5Employees.map(item => item.employee_salary);
+  
+      console.log('Dummy API response data', dummyData);
+      console.log('Top 5 employees', top5Employees);
+      console.log('Categories', dummyCategories);
+      console.log('Series', dummySeries);
+  
+      const updatedChartState = {
+        ...bestBuySupplierChartTemplate,
+        series: [{ name: "Salary", data: dummySeries }],
+        options: {
+          ...bestBuySupplierChartTemplate.options,
+          xaxis: { categories: dummyCategories },
+          yaxis: {
+            labels: {
+              formatter: (value) => value.toFixed(0),
+            },
+          },
+        },
+      };
+  
+      setStatisticsChartsData(prevState =>
+        prevState.map(chartData => {
+          if (chartData.title === "Best Buy Supplier") {
+            return {
+              ...chartData,
+              chart: updatedChartState,
+            };
+          }
+          return chartData;
+        })
+      );
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+    }
+  };
+  
+  
 
   const fetchData = async () => {
     const isBasedOnInvoiceCount = basedOn === 'count';
@@ -196,53 +255,52 @@ export function Home() {
       axios.get(bestBuyProductsUrl)
     ]);
 
-    // Handle best supplier data
-    const bestSupplierData = bestSupplierResponse.data.dashboardModels;
-    const categories = bestSupplierData.map(item => item.supplierCode);
-    const series = bestSupplierData.map(item => item.totalAmount);
+      // Handle best supplier data
+      const bestSupplierData = bestSupplierResponse.data.dashboardModels;
+      const categories = bestSupplierData.map(item => item.supplierCode);
+      const series = bestSupplierData.map(item => item.totalAmount);
 
-    setBestBuySupplierChartState({
-      ...bestBuySupplierChartState,
-      series: [{ name: "Purchases", data: series }],
-      options: {
-        ...bestBuySupplierChartState.options,
-        xaxis: { categories },
-      },
-    });
+      setBestBuySupplierChartState({
+        ...bestBuySupplierChartTemplate,
+        series: [{ name: "Purchases", data: series }],
+        options: {
+          ...bestBuySupplierChartTemplate.options,
+          xaxis: { categories },
+        },
+      });
 
-    // Handle analytics price data
-    const analyticsPriceData = analyticsPriceResponse.data.DashboardPrices[0];
-    setAveragePrice(analyticsPriceData.avgPrice.toFixed(2));
-    setHighestPrice(analyticsPriceData.maxPrice);
-    setHighestPriceDate(analyticsPriceData.maxPriceDate);
-    setLowestPrice(analyticsPriceData.minPrice);
-    setLowestPriceDate(analyticsPriceData.minPriceDate);
+      // Handle analytics price data
+      const analyticsPriceData = analyticsPriceResponse.data.DashboardPrices[0];
+      setAveragePrice(analyticsPriceData.avgPrice.toFixed(2));
+      setHighestPrice(analyticsPriceData.maxPrice);
+      setHighestPriceDate(analyticsPriceData.maxPriceDate);
+      setLowestPrice(analyticsPriceData.minPrice);
+      setLowestPriceDate(analyticsPriceData.minPriceDate);
 
-    // Handle average purchase quantity data
-    const avgPurchaseQtyData = avgPurchaseQtyResponse.data.avgPurchaseQty[0];
-    setAveragePriceQTY(avgPurchaseQtyData.avgPurchaseQty.toFixed(2));
+      // Handle average purchase quantity data
+      const avgPurchaseQtyData = avgPurchaseQtyResponse.data.avgPurchaseQty[0];
+      setAveragePriceQTY(avgPurchaseQtyData.avgPurchaseQty.toFixed(2));
 
-    // Handle total orders data
-    const totalOrdersData = totalOrdersResponse.data.totNoOfOrders[0];
-    setTotalNoOfOrders(totalOrdersData.totalOrders);
+      // Handle total orders data
+      const totalOrdersData = totalOrdersResponse.data.totNoOfOrders[0];
+      setTotalNoOfOrders(totalOrdersData.totalOrders);
 
-    // Handle most supplied suppliers data
-    const mostSuppliedSuppliersData = mostSuppliedSuppliersResponse.data.mostSuppliedSupplierss.map((supplier) => ({
-      code: supplier.supplierCode,
-      description: supplier.totalSupplied
-    }));
-    setTableData(mostSuppliedSuppliersData);
+      // Handle most supplied suppliers data
+      const mostSuppliedSuppliersData = mostSuppliedSuppliersResponse.data.mostSuppliedSupplierss.map((supplier) => ({
+        code: supplier.supplierCode,
+        description: supplier.totalSupplied
+      }));
+      setTableData(mostSuppliedSuppliersData);
 
-     // Handle best buy products data
-     const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
-     const highestProduct = bestBuyProducts.reduce((max, product) => product.OrderQty > max.OrderQty ? product : max, bestBuyProducts[0]);
-     setBestBuyProducts(highestProduct.catlogCode);
+      // Handle best buy products data
+      const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
+      const highestProduct = bestBuyProducts.reduce((max, product) => product.OrderQty > max.OrderQty ? product : max, bestBuyProducts[0]);
+      setBestBuyProducts(highestProduct.catlogCode);
 
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-};
-  
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const handleOptionChange = (e) => {
     setSelectedOption(e.target.value);
@@ -257,25 +315,7 @@ export function Home() {
   };
 
   const updateCardContents = (option) => {
-    if (option === "allProducts") {
-      setCard3Content("Content for Products - Card 3");
-      setTableData([
-        { code: "P001", description: "Product 1" },
-        { code: "P002", description: "Product 2" },
-        { code: "P003", description: "Product 3" },
-        { code: "P004", description: "Product 4" },
-        { code: "P005", description: "Product 5" },
-      ]);
-    } else if (option === "allSuppliers") {
-      setCard3Content("Content for Suppliers - Card 3");
-      setTableData([
-        { code: "S001", description: "Supplier 1" },
-        { code: "S002", description: "Supplier 2" },
-        { code: "S003", description: "Supplier 3" },
-        { code: "S004", description: "Supplier 4" },
-        { code: "S005", description: "Supplier 5" },
-      ]);
-    }
+    // Update card contents based on the selected option
   };
 
   const generatePriceHikeData = (timeFrame) => {
@@ -530,18 +570,6 @@ export function Home() {
           )
         ))}
       </div>
-      {chartData && (
-        <StatisticsChart
-          chart={{
-            type: 'pie',
-            height: 220,
-            series: chartData.series,
-            options: chartData.options,
-          }}
-          title="Product Purchase Audit"
-          description=""
-        />
-      )}
       <Card className="border border-blue-gray-100 shadow-sm">
         <CardHeader variant="gradient" color="white" floated={false} shadow={false}>
           <div className="flex justify-start space-x-2 mb-2">
