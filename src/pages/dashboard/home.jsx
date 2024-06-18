@@ -223,8 +223,17 @@ const productPurchaseAuditChart = {
 
   const handleSearchChange = (selectedOption) => {
     setSearchTerm(selectedOption);
+    if (!selectedOption) {
+      setAveragePrice("");
+      setHighestPrice("");
+      setHighestPriceDate("");
+      setLowestPrice("");
+      setLowestPriceDate("");
+      setAveragePriceQTY("");
+      setTotalNoOfOrders("");
+    }
   };
-
+  
   
   //bar chart api fetching function
 
