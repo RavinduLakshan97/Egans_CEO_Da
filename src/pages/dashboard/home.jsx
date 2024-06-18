@@ -225,53 +225,7 @@ const productPurchaseAuditChart = {
     setSearchTerm(selectedOption);
   };
 
-  // const fetchChartData = async () => {
-  //   try {
-  //     const response = await axios.get('https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=2020-01-01&to=2024-12-31&productCode=6LABOURWS&isBasedOnInvoiceCount=false&isBasedOnValue=true&isBasedOnQty=false&viewCount=5');
   
-  //     const dashboardModels = response.data.dashboardModels;
-  
-  //     // Sort suppliers by total amount in descending order and select the top 5
-  //     const top5Suppliers = dashboardModels.sort((a, b) => b.totalAmount - a.totalAmount).slice(0, 5);
-  
-  //     const supplierCategories = top5Suppliers.map(item => item.supplierCode);
-  //     const supplierSeries = top5Suppliers.map(item => item.totalAmount);
-  
-  //     console.log('API response data', dashboardModels);
-  //     console.log('Top 5 suppliers', top5Suppliers);
-  //     console.log('Categories', supplierCategories);
-  //     console.log('Series', supplierSeries);
-  
-  //     const updatedChartState = {
-  //       ...bestBuySupplierChartTemplate,
-  //       series: [{ name: "Total Amount", data: supplierSeries }],
-  //       options: {
-  //         ...bestBuySupplierChartTemplate.options,
-  //         xaxis: { categories: supplierCategories },
-  //         yaxis: {
-  //           labels: {
-  //             formatter: (value) => value.toFixed(2),
-  //           },
-  //         },
-  //       },
-  //     };
-  
-  //     setStatisticsChartsData(prevState =>
-  //       prevState.map(chartData => {
-  //         if (chartData.title === "Best Buy Supplier") {
-  //           return {
-  //             ...chartData,
-  //             chart: updatedChartState,
-  //           };
-  //         }
-  //         return chartData;
-  //       })
-  //     );
-  //   } catch (error) {
-  //     console.error("Error fetching chart data:", error);
-  //   }
-  // };
-
   //bar chart api fetching function
 
   const fetchChartData = async () => {
@@ -480,77 +434,44 @@ const productPurchaseAuditChart = {
     // Update card contents based on the selected option
   };
 
-  const generatePriceHikeData = (timeFrame) => {
-    const now = moment();
-    let categories = [];
-    let seriesData = [
-      { name: "Product A", data: [] },
-      { name: "Product B", data: [] },
-      { name: "Product C", data: [] },
-    ];
-    let tooltipLabels = [];
 
-    switch (timeFrame) {
-      case 'year':
-        for (let i = 0; i < 5; i++) {
-          categories.push(now.clone().subtract(i, 'years').format('YYYY'));
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
-          tooltipLabels.push(now.clone().subtract(i, 'years').format('YYYY'));
-        }
-        categories.reverse();
-        seriesData.forEach(series => series.data.reverse());
-        tooltipLabels.reverse();
-        break;
-
-      case 'month':
-        const currentMonth = now.month(); // 0-11
-        for (let i = currentMonth; i >= 0; i--) {
-          categories.push(now.month(i).format('MMM'));
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
-          tooltipLabels.push(now.month(i).format('MMM'));
-        }
-        categories.reverse();
-        seriesData.forEach(series => series.data.reverse());
-        tooltipLabels.reverse();
-        break;
-
-      case 'week':
-        const currentWeek = now.isoWeek();
-        for (let i = 0; i < currentWeek; i++) {
-          categories.push(`Week ${now.clone().subtract(i, 'weeks').isoWeek()}`);
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
-          tooltipLabels.push(now.clone().subtract(i, 'weeks').format('MMM'));
-        }
-        categories.reverse();
-        seriesData.forEach(series => series.data.reverse());
-        tooltipLabels.reverse();
-        break;
-
-      case 'day':
-        for (let i = 0; i < 7; i++) {
-          categories.push(now.clone().subtract(i, 'days').format('ddd'));
-          seriesData[0].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[1].data.push(Math.floor(Math.random() * 500) + 100);
-          seriesData[2].data.push(Math.floor(Math.random() * 500) + 100);
-          tooltipLabels.push(now.clone().subtract(i, 'days').format('dddd'));
-        }
-        categories.reverse();
-        seriesData.forEach(series => series.data.reverse());
-        tooltipLabels.reverse();
-        break;
-
-      default:
-        break;
+  const fetchAveragePricesData = async (timeFrameType) => {
+    try {
+      const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductaveragepriceforaperiod?productCode=${searchTerm.value}&type=${selectedTimeFrame}&value=2023-05-20`;
+      const response = await axios.get(url);
+      const productAveragePrices = response.data.productAveragePrices;
+  
+      let categories = [];
+      let seriesData = [];
+  
+      if (timeFrameType === 0) {
+        categories = productAveragePrices.map(item => item.year);
+      } else if (timeFrameType === 1) {
+        categories = productAveragePrices.map(item => `Month ${item.month}`);
+      } else if (timeFrameType === 2) {
+        categories = productAveragePrices.map(item => `Week ${item.week}`);
+      } else if (timeFrameType === 3) {
+        categories = productAveragePrices.map(item => item.day);
+      }
+  
+      seriesData = productAveragePrices.map(item => item.averagePrice);
+  
+      const updatedChartData = {
+        series: [{ name: "Average Price", data: seriesData }],
+        options: {
+          ...priceHikeChartData.options,
+          xaxis: {
+            categories: categories,
+          },
+        },
+      };
+  
+      setPriceHikeChartData(updatedChartData);
+    } catch (error) {
+      console.error("Error fetching average prices data:", error);
     }
-
-    return { categories, seriesData, tooltipLabels };
   };
+
 
   const getHoverContent = (seriesIndex, dataPointIndex, series) => {
     const month = moment().isoWeek(dataPointIndex + 1).format('MMM');
@@ -584,30 +505,33 @@ const productPurchaseAuditChart = {
   };
 
   const updatePriceHikeChart = (timeFrame) => {
-    const { categories, seriesData } = generatePriceHikeData(timeFrame);
-
-    const newChartData = {
-      series: seriesData,
-      options: {
-        ...priceHikeChartData.options,
-        colors: ["#FFCE56", "#4BC0C0", "#9966FF"], 
-        xaxis: {
-          categories: categories,
-        },
-        tooltip: {
-          custom: ({ seriesIndex, dataPointIndex, w }) => {
-            return getHoverContent(seriesIndex, dataPointIndex, w.globals.series);
-          }
-        }
-      },
-    };
-
-    setPriceHikeChartData(newChartData);
+    let timeFrameType;
+    switch (timeFrame) {
+      case 'year':
+        timeFrameType = 0;
+        break;
+      case 'month':
+        timeFrameType = 1;
+        break;
+      case 'week':
+        timeFrameType = 2;
+        break;
+      case 'day':
+        timeFrameType = 3;
+        break;
+      default:
+        timeFrameType = 0;
+    }
+  
+    fetchAveragePricesData(timeFrameType);
   };
+  
 
   const handleTimeFrameChange = (timeFrame) => {
     setSelectedTimeFrame(timeFrame);
+    updatePriceHikeChart(timeFrame);
   };
+  
 
   const customSliderStyles = {
     trackStyle: { backgroundColor: '#3a0ca3' },
