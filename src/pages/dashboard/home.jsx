@@ -11,6 +11,7 @@ import {
   MenuList,
   MenuItem,
   Button,
+  Switch
 } from "@material-tailwind/react";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
@@ -23,6 +24,8 @@ import 'rc-slider/assets/index.css';
 import { chartsConfig } from "@/configs";
 
 export function Home() {
+
+  const [toggle, setToggle] = useState();
 
   const bestBuySupplierChartTemplate = {
     type: "bar",
@@ -66,18 +69,46 @@ const priceHikeChart = {
   },
 };
 
-const productPurchaseAuditChart = (data) => ({
+// const productPurchaseAuditChart = (data) => ({
+//   type: "donut",
+//   height: 220,
+//   series: data.series,
+//   options: {
+//     ...chartsConfig,
+//     colors: ["#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#FFCD56", "#C9CBCF", "#36A2EB"],
+//     labels: data.labels,
+//   },
+// });
+
+const productPurchaseAuditChart = {
   type: "donut",
   height: 220,
-  series: data.series,
+  series: [],
   options: {
     ...chartsConfig,
     colors: ["#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#FFCD56", "#C9CBCF", "#36A2EB"],
-    labels: data.labels,
+    labels: [],
   },
-});
+};
 
   const [statisticsChartsData, setStatisticsChartsData] = useState([
+    // {
+    //   color: "white",
+    //   title: (
+    //     <div className="flex justify-between items-center w-full">
+    //       <Typography variant="h6" color="blue-gray">
+    //         Best Buy Supplier
+    //       </Typography>
+    //       <Switch
+    //         color="blue"
+    //         checked={toggle}
+    //         onChange={() => setToggle(!toggle)}
+    //       />
+    //     </div>
+    //   ),
+    //   description: "",
+    //   chart: bestBuySupplierChartTemplate,
+    // },
     {
       color: "white",
       title: "Best Buy Supplier",
@@ -94,7 +125,8 @@ const productPurchaseAuditChart = (data) => ({
       color: "white",
       title: "Product Purchase Audit",
       description: "",
-      chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
+      chart: productPurchaseAuditChart,
+      //chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
     },
   ]);
 
@@ -129,6 +161,8 @@ const productPurchaseAuditChart = (data) => ({
 
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('year');
   const [priceHikeChartData, setPriceHikeChartData] = useState(statisticsChartsData[1].chart);
+  const [productPurchaseAuditChartState, setProductPurchaseAuditChartState] = useState(productPurchaseAuditChart);
+
 
   useEffect(() => {
     fetchProducts();
@@ -158,6 +192,20 @@ const productPurchaseAuditChart = (data) => ({
     updatePriceHikeChart(selectedTimeFrame);
   }, [selectedTimeFrame]);
 
+  useEffect(() => {
+    if(fromDate && toDate && viewCount){
+      fetchProductPurchaseAuditData();
+    }
+    
+  }, [fromDate,toDate,viewCount]);
+
+  useEffect(() => {
+    if (fromDate && toDate && searchTerm && basedOn && viewCount) {
+      fetchChartData();
+    }
+  }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
+  
+
   const fetchProducts = async () => {
     try {
       const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getallproducts`;
@@ -177,32 +225,78 @@ const productPurchaseAuditChart = (data) => ({
     setSearchTerm(selectedOption);
   };
 
+  // const fetchChartData = async () => {
+  //   try {
+  //     const response = await axios.get('https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=2020-01-01&to=2024-12-31&productCode=6LABOURWS&isBasedOnInvoiceCount=false&isBasedOnValue=true&isBasedOnQty=false&viewCount=5');
+  
+  //     const dashboardModels = response.data.dashboardModels;
+  
+  //     // Sort suppliers by total amount in descending order and select the top 5
+  //     const top5Suppliers = dashboardModels.sort((a, b) => b.totalAmount - a.totalAmount).slice(0, 5);
+  
+  //     const supplierCategories = top5Suppliers.map(item => item.supplierCode);
+  //     const supplierSeries = top5Suppliers.map(item => item.totalAmount);
+  
+  //     console.log('API response data', dashboardModels);
+  //     console.log('Top 5 suppliers', top5Suppliers);
+  //     console.log('Categories', supplierCategories);
+  //     console.log('Series', supplierSeries);
+  
+  //     const updatedChartState = {
+  //       ...bestBuySupplierChartTemplate,
+  //       series: [{ name: "Total Amount", data: supplierSeries }],
+  //       options: {
+  //         ...bestBuySupplierChartTemplate.options,
+  //         xaxis: { categories: supplierCategories },
+  //         yaxis: {
+  //           labels: {
+  //             formatter: (value) => value.toFixed(2),
+  //           },
+  //         },
+  //       },
+  //     };
+  
+  //     setStatisticsChartsData(prevState =>
+  //       prevState.map(chartData => {
+  //         if (chartData.title === "Best Buy Supplier") {
+  //           return {
+  //             ...chartData,
+  //             chart: updatedChartState,
+  //           };
+  //         }
+  //         return chartData;
+  //       })
+  //     );
+  //   } catch (error) {
+  //     console.error("Error fetching chart data:", error);
+  //   }
+  // };
+
+  //bar chart api fetching function
+
   const fetchChartData = async () => {
     try {
-      const response = await axios.get('https://dummy.restapiexample.com/api/v1/employees');
+      const isBasedOnInvoiceCount = basedOn === 'count';
+      const isBasedOnValue = basedOn === 'value';
+      const isBasedOnQty = basedOn === 'qty';
   
-      const dummyData = response.data.data;
+      const response = await axios.get(`https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`);
+      
+      const dashboardModels = response.data.dashboardModels;
   
-      // Sort employees by salary in descending order and select the top 5
-      const top5Employees = dummyData.sort((a, b) => b.employee_salary - a.employee_salary).slice(0, 5);
-  
-      const dummyCategories = top5Employees.map(item => item.employee_name);
-      const dummySeries = top5Employees.map(item => item.employee_salary);
-  
-      console.log('Dummy API response data', dummyData);
-      console.log('Top 5 employees', top5Employees);
-      console.log('Categories', dummyCategories);
-      console.log('Series', dummySeries);
+      // Extracting supplier codes and total amounts
+      const supplierCodes = dashboardModels.map(item => item.supplierCode);
+      const totalAmounts = dashboardModels.map(item => item.totalAmount);
   
       const updatedChartState = {
         ...bestBuySupplierChartTemplate,
-        series: [{ name: "Salary", data: dummySeries }],
+        series: [{ name: "Total Amount", data: totalAmounts }],
         options: {
           ...bestBuySupplierChartTemplate.options,
-          xaxis: { categories: dummyCategories },
+          xaxis: { categories: supplierCodes },
           yaxis: {
             labels: {
-              formatter: (value) => value.toFixed(0),
+              formatter: (value) => value.toFixed(2),
             },
           },
         },
@@ -223,6 +317,62 @@ const productPurchaseAuditChart = (data) => ({
       console.error("Error fetching chart data:", error);
     }
   };
+  
+  
+  
+  //pie chart api fetching function
+
+  const fetchProductPurchaseAuditData = async () => {
+    try {
+      const response = await axios.get(`https://testportalapi.egansgroup.com.au/api/bestsupplier/getmaximumordersforproducts?from=${fromDate}&to=${toDate}&viewCount=${viewCount}`);
+  
+      const maxOrderQtyData = response.data.maxOrderQty;
+  
+      // Limit to top 5 results
+      const top5Data = maxOrderQtyData.slice(0, 5);
+  
+      // Extracting series data and labels
+      const seriesData = top5Data.map(item => item.maxOrderQty);
+      const labels = top5Data.map(item => item.catlogCode);
+  
+      const updatedChartState = {
+        ...productPurchaseAuditChart,
+        series: seriesData,
+        options: {
+          ...productPurchaseAuditChart.options,
+          labels: labels,
+          legend: {
+            formatter: function(val, opts) {
+              return labels[opts.seriesIndex];
+            }
+          },
+          tooltip: {
+            y: {
+              formatter: function (value, { seriesIndex, dataPointIndex, w }) {
+                return `${labels[dataPointIndex]}: ${value}`;
+              }
+            }
+          }
+        },
+      };
+  
+      setStatisticsChartsData((prevState) =>
+        prevState.map((chartData) => {
+          if (chartData.title === "Product Purchase Audit") {
+            return {
+              ...chartData,
+              chart: updatedChartState,
+            };
+          }
+          return chartData;
+        })
+      );
+    } catch (error) {
+      console.error("Error fetching product purchase audit data:", error);
+    }
+  };
+  
+  
   
   
 
