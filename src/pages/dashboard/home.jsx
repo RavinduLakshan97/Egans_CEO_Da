@@ -123,7 +123,7 @@ const productPurchaseAuditChart = {
     },
     {
       color: "white",
-      title: "Product Purchase Audit",
+      title: "Maximum Orders For Products",
       description: "",
       chart: productPurchaseAuditChart,
       //chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
@@ -280,17 +280,29 @@ const productPurchaseAuditChart = {
       const isBasedOnValue = basedOn === 'value';
       const isBasedOnQty = basedOn === 'qty';
   
-      const response = await axios.get(`https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`);
+      const response = await axios.get(`https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm ? searchTerm.value : ''}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`);
       
       const dashboardModels = response.data.dashboardModels;
   
-      // Extracting supplier codes and total amounts
+      let yAxisData;
+      let yAxisLabel;
+  
+      if (isBasedOnInvoiceCount) {
+        yAxisData = dashboardModels.map(item => item.invoiceCount);
+        yAxisLabel = "Invoice Count";
+      } else if (isBasedOnValue) {
+        yAxisData = dashboardModels.map(item => item.totalAmount);
+        yAxisLabel = "Total Amount";
+      } else if (isBasedOnQty) {
+        yAxisData = dashboardModels.map(item => item.totalQuantity);
+        yAxisLabel = "Total Quantity";
+      }
+  
       const supplierCodes = dashboardModels.map(item => item.supplierCode);
-      const totalAmounts = dashboardModels.map(item => item.totalAmount);
   
       const updatedChartState = {
         ...bestBuySupplierChartTemplate,
-        series: [{ name: "Total Amount", data: totalAmounts }],
+        series: [{ name: yAxisLabel, data: yAxisData }],
         options: {
           ...bestBuySupplierChartTemplate.options,
           xaxis: { categories: supplierCodes },
@@ -317,6 +329,7 @@ const productPurchaseAuditChart = {
       console.error("Error fetching chart data:", error);
     }
   };
+  
   
   
   
@@ -358,7 +371,7 @@ const productPurchaseAuditChart = {
   
       setStatisticsChartsData((prevState) =>
         prevState.map((chartData) => {
-          if (chartData.title === "Product Purchase Audit") {
+          if (chartData.title === "Maximum Orders For Products") {
             return {
               ...chartData,
               chart: updatedChartState,
@@ -368,10 +381,9 @@ const productPurchaseAuditChart = {
         })
       );
     } catch (error) {
-      console.error("Error fetching product purchase audit data:", error);
+      console.error("Error fetching Maximum Orders For Products data:", error);
     }
   };
-  
   
   
   
@@ -387,7 +399,7 @@ const productPurchaseAuditChart = {
     const totalOrdersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/gettotalnooforders?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
     const mostSuppliedSuppliersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductmostsuppliedsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
     const bestBuyProductsUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestbuyproducts?from=${fromDate}&to=${toDate}&viewCount=5`;
-
+    
   try {
     const [
       bestSupplierResponse,
@@ -679,36 +691,37 @@ const productPurchaseAuditChart = {
         </Card>
       </div>
       <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {statisticsCardsData.map(({ icon, title, footer, from, to, product, based_on, showDatePickers, showCustomFields, showOrderStats, showProductStats, showMostPurchaseProductSupplier, backgroundColor, ...rest }) => (
-          <StatisticsCard
-            key={title}
-            {...rest}
-            from={from}
-            to={to}
-            product={product}
-            backgroundColor={backgroundColor}
-            showDatePickers={showDatePickers}
-            based_on={based_on}
-            icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
-            showCustomFields={showCustomFields}
-            showOrderStats={showOrderStats}
-            showProductStats={showProductStats}
-            showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
-            card3Content={card3Content}
-            card4Content={card4Content}
-            tableData={filteredTableData}
-            selectedOption={selectedOption}
-            average_price={averagePrice}
-            highest_price={highestPrice}
-            highest_price_date={highestPriceDate}
-            lowest_price={lowestPrice}
-            lowest_price_date={lowestPriceDate}
-            average_price_quantity={averagePriceQTY}
-            total_no_of_orders={totalNoOfOrders}
-            bestBuyProducts={bestBuyProducts}
-          />
-        ))}
-      </div>
+  {statisticsCardsData.map(({ icon, title, footer, from, to, product, based_on, showDatePickers, showCustomFields, showOrderStats, showProductStats, showMostPurchaseProductSupplier, backgroundColor, ...rest }) => (
+    <StatisticsCard
+      key={title}
+      {...rest}
+      from={from}
+      to={to}
+      product={product}
+      backgroundColor={backgroundColor}
+      showDatePickers={showDatePickers}
+      based_on={based_on}
+      icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
+      showCustomFields={showCustomFields}
+      showOrderStats={showOrderStats}
+      showProductStats={showProductStats}
+      showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
+      card3Content={card3Content}
+      card4Content={card4Content}
+      tableData={filteredTableData}
+      selectedOption={selectedOption}
+      average_price={searchTerm ? averagePrice : ""}
+      highest_price={searchTerm ? highestPrice : ""}
+      highest_price_date={searchTerm ? highestPriceDate : ""}
+      lowest_price={searchTerm ? lowestPrice : ""}
+      lowest_price_date={searchTerm ? lowestPriceDate : ""}
+      average_price_quantity={searchTerm ? averagePriceQTY : ""}
+      total_no_of_orders={searchTerm ? totalNoOfOrders : ""}
+      bestBuyProducts={bestBuyProducts}
+    />
+  ))}
+</div>
+
       <div className="mb-3 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props) => (
           props.title !== "Average prices for the period" && (
