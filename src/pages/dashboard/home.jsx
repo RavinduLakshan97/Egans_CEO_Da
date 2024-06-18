@@ -545,7 +545,8 @@ const productPurchaseAuditChart = {
   return (
     <div className="mt-3">
       <div className="mb-7 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#F28482' }}>
+        {/* <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#F28482' }}> */}
+        <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200">
           <div className="px-1 mt-3 grid grid-cols-1">      
             <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
             <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={fromDate} onChange={(e) => setFromDate(e.target.value)}/>     
@@ -555,14 +556,16 @@ const productPurchaseAuditChart = {
             <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={toDate} onChange={(e) => setToDate(e.target.value)}/>     
           </div>
         </Card>
-        <Card className="bg-gray-200" style={{ backgroundColor: '#C8B6FF' }}>
+        {/* <Card className="bg-gray-200" style={{ backgroundColor: '#C8B6FF' }}> */}
+        <Card className="bg-gray-200">
           <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Product/Supplier </label>
           <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" value={selectedOption} onChange={handleOptionChange}>
             <option value="allProducts">All Products</option>
             <option value="allSuppliers">All Suppliers</option>
           </select>
         </Card>
-        <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}>
+        {/* <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}> */}
+        <Card className="bg-gray-200">
           <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
             <Select
@@ -574,7 +577,8 @@ const productPurchaseAuditChart = {
             />
           </div>
         </Card>
-        <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}>
+        {/* <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}> */}
+        <Card className="bg-gray-200" >
           <div className="flex-1 mt-3 ml-2">
             <label className="block text-sm font-medium text-black mb-2">View Count</label>
             <Slider
