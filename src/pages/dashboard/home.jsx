@@ -153,6 +153,7 @@ const productPurchaseAuditChart = {
   const [averagePriceQTY, setAveragePriceQTY] = useState("");
   const [totalNoOfOrders, setTotalNoOfOrders] = useState("");
   const [bestBuyProducts, setBestBuyProducts] = useState([]);
+  const [bestBuySupplierCode, setBestBuySupplierCode] = useState([]);
 
   const [card3Content, setCard3Content] = useState("");
   const [card4Content, setCard4Content] = useState("");
@@ -416,7 +417,12 @@ const productPurchaseAuditChart = {
         description: supplier.totalSupplied
       }));
       setTableData(mostSuppliedSuppliersData);
-
+      console.log("Most Supplied Suppliers Data:", mostSuppliedSuppliersData);
+      if (mostSuppliedSuppliersData.length > 0) {
+        setBestBuySupplierCode(mostSuppliedSuppliersData[0].code);
+        console.log("Set Best Buy Supplier:", mostSuppliedSuppliersData[0].code);
+      }
+  
       // Handle best buy products data
       const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
       const highestProduct = bestBuyProducts.reduce((max, product) => product.OrderQty > max.OrderQty ? product : max, bestBuyProducts[0]);
@@ -446,7 +452,7 @@ const productPurchaseAuditChart = {
 
   const fetchAveragePricesData = async (timeFrameType) => {
     try {
-      const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductaveragepriceforaperiod?productCode=${searchTerm.value}&type=${selectedTimeFrame}&value=2023-05-20`;
+      const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductaveragepriceforaperiod?productCode=${searchTerm.value}&type=${selectedTimeFrame}&value=${toDate}`;
       const response = await axios.get(url);
       const productAveragePrices = response.data.productAveragePrices;
   
@@ -655,6 +661,7 @@ const productPurchaseAuditChart = {
       average_price_quantity={searchTerm ? averagePriceQTY : ""}
       total_no_of_orders={searchTerm ? totalNoOfOrders : ""}
       bestBuyProducts={bestBuyProducts}
+      bestBuySupplierCode={bestBuySupplierCode}
     />
   ))}
 </div>
