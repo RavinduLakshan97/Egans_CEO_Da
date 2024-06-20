@@ -422,7 +422,7 @@ const pyramidChartTemplate = {
     const avgPurchaseQtyUrl = `${Average_Purchase_Quantity_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
     const totalOrdersUrl = `${Total_Orders_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
     const mostSuppliedSuppliersUrl = `${Most_Supplied_Suppliers_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
-    
+
 
     try {
       const [
@@ -657,117 +657,145 @@ const pyramidChartTemplate = {
   };
 
   return (
-    <div className="mt-3">
-      <div className="mb-7 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {/* <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200" style={{ backgroundColor: '#F28482' }}> */}
-        <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200">
-          <div className="px-1 mt-3 grid grid-cols-1">      
-            <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
-            <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={fromDate} onChange={(e) => setFromDate(e.target.value)}/>     
-          </div>
-          <div className="px-1 mt-3 grid grid-cols-1">      
-            <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> To </label>
-            <input type="date" className="mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" value={toDate} onChange={(e) => setToDate(e.target.value)}/>     
-          </div>
-        </Card>
-        {/* <Card className="bg-gray-200" style={{ backgroundColor: '#C8B6FF' }}> */}
-        <Card className="bg-gray-200">
-          <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Product/Supplier </label>
-          <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" value={selectedOption} onChange={handleOptionChange}>
-            <option value="allProducts">All Products</option>
-            {/* <option value="allSuppliers">All Suppliers</option> */}
-          </select>
-        </Card>
-        {/* <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}> */}
-        <Card className="bg-gray-200">
-          <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
-            <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
-            <Select
-              className="mb-3"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              options={filteredProducts}
-              isClearable
+    <div className="mt-5">
+    <div className="mb-7 grid gap-y-5 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+      <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200">
+        <div className="px-1 mt-3 grid grid-cols-1">      
+          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
+          <input 
+            type="date" 
+            className="mb-2 md:mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" 
+            value={fromDate} 
+            onChange={(e) => setFromDate(e.target.value)}
+          />     
+        </div>
+        <div className="px-1 mt-3 grid grid-cols-1">      
+          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> To </label>
+          <input 
+            type="date" 
+            className="mb-2 md:mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" 
+            value={toDate} 
+            onChange={(e) => setToDate(e.target.value)}
+          />     
+        </div>
+      </Card>
+      <Card className="bg-gray-200">
+        <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Product/Supplier </label>
+        <select 
+          className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" 
+          value={selectedOption} 
+          onChange={handleOptionChange}
+        >
+          <option value="allProducts">All Products</option>
+        </select>
+      </Card>
+      <Card className="bg-gray-200">
+        <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
+          <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
+          <Select
+            className="mb-3"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            options={filteredProducts}
+            isClearable
+          />
+        </div>
+      </Card>
+      <Card className="bg-gray-200 mb-2">
+        <div className="flex-1 mt-3 ml-2">
+          <label className="block text-sm font-medium text-black mb-2">View Count</label>
+          <Slider
+            className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100" 
+            min={1}
+            max={5}
+            valueLabelDisplay="auto"
+            keyboard
+            value={viewCount}
+            onChange={value => setViewCount(value)}
+            trackStyle={customSliderStyles.trackStyle}
+            handleStyle={customSliderStyles.handleStyle}
+            railStyle={customSliderStyles.railStyle}
+          />
+        </div>
+        <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
+        <div className="flex items-center space-x-6 ml-2 mb-2">
+          <div>
+            <input 
+              className="mr-1" 
+              type="radio" 
+              id="value" 
+              name="basedOn" 
+              value="value" 
+              checked={basedOn === 'value'} 
+              onChange={(e) => setBasedOn(e.target.value)} 
             />
+            <label htmlFor="value" className="text-black">Value</label>
           </div>
-        </Card>
-        {/* <Card className="bg-gray-200" style={{ backgroundColor: '#CAF0F8' }}> */}
-        <Card className="bg-gray-200" >
-          <div className="flex-1 mt-3 ml-2">
-            <label className="block text-sm font-medium text-black mb-2">View Count</label>
-            <Slider
-              className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100" 
-              min={1}
-              max={5}
-              valueLabelDisplay="auto"
-              keyboard
-              value={viewCount}
-              onChange={value => setViewCount(value)}
-              // marks={{
-              //   1: '1',
-              //   2: '2',
-              //   3: '3',
-              //   4: '4',
-              //   5: '5',
-              // }}
-              trackStyle={customSliderStyles.trackStyle}
-              handleStyle={customSliderStyles.handleStyle}
-              railStyle={customSliderStyles.railStyle}
+          <div>
+            <input 
+              className="mr-1" 
+              type="radio" 
+              id="qty" 
+              name="basedOn" 
+              value="qty" 
+              checked={basedOn === 'qty'} 
+              onChange={(e) => setBasedOn(e.target.value)} 
             />
+            <label htmlFor="qty" className="text-black">Quantity</label>
           </div>
-          <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
-          <div className="flex items-center space-x-6 ml-2 mb-2">
-            <div>
-              <input className="mr-1" type="radio" id="value" name="basedOn" value="value" checked={basedOn === 'value'} onChange={(e) => setBasedOn(e.target.value)} />
-              <label htmlFor="value" className="text-black">Value</label>
-            </div>
-            <div>
-              <input className="mr-1" type="radio" id="qty" name="basedOn" value="qty" checked={basedOn === 'qty'} onChange={(e) => setBasedOn(e.target.value)} />
-              <label htmlFor="qty" className="text-black">Quantity</label>
-            </div>
-            <div>
-              <input className="mr-1" type="radio" id="count" name="basedOn" value="count" checked={basedOn === 'count'} onChange={(e) => setBasedOn(e.target.value)} />
-              <label htmlFor="count" className="text-black">Count</label>
-            </div>
+          <div>
+            <input 
+              className="mr-1" 
+              type="radio" 
+              id="count" 
+              name="basedOn" 
+              value="count" 
+              checked={basedOn === 'count'} 
+              onChange={(e) => setBasedOn(e.target.value)} 
+            />
+            <label htmlFor="count" className="text-black">Count</label>
           </div>
-        </Card>
-      </div>
-      <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-  {statisticsCardsData.map(({ icon, title, footer, from, to, product, based_on, showDatePickers, showCustomFields, showOrderStats, showProductStats, showMostPurchaseProductSupplier, backgroundColor, ...rest }) => (
-    <StatisticsCard
-      key={title}
-      {...rest}
-      from={from}
-      to={to}
-      product={product}
-      backgroundColor={backgroundColor}
-      showDatePickers={showDatePickers}
-      based_on={based_on}
-      icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
-      showCustomFields={showCustomFields}
-      showOrderStats={showOrderStats}
-      showProductStats={showProductStats}
-      showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
-      card3Content={card3Content}
-      card4Content={card4Content}
-      tableData={filteredTableData}
-      selectedOption={selectedOption}
-      average_price={searchTerm ? averagePrice : ""}
-      highest_price={searchTerm ? highestPrice : ""}
-      highest_price_date={searchTerm ? highestPriceDate : ""}
-      lowest_price={searchTerm ? lowestPrice : ""}
-      lowest_price_date={searchTerm ? lowestPriceDate : ""}
-      average_price_quantity={searchTerm ? averagePriceQTY : ""}
-      total_no_of_orders={searchTerm ? totalNoOfOrders : ""}
-      bestBuyProducts={bestBuyProducts}
-      bestBuySupplierCode={bestBuySupplierCode}
-    />
-  ))}
-</div>
+        </div>
+      </Card>
+    </div>
+    <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+      {statisticsCardsData.map(({ icon, title, footer, from, to, product, based_on, showDatePickers, showCustomFields, showOrderStats, showProductStats, showMostPurchaseProductSupplier, backgroundColor, ...rest }) => (
+        <StatisticsCard
+          key={title}
+          {...rest}
+          from={from}
+          to={to}
+          product={product}
+          backgroundColor={backgroundColor}
+          showDatePickers={showDatePickers}
+          based_on={based_on}
+          icon={React.createElement(icon, { className: "w-6 h-6 text-white" })}
+          showCustomFields={showCustomFields}
+          showOrderStats={showOrderStats}
+          showProductStats={showProductStats}
+          showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
+          card3Content={card3Content}
+          card4Content={card4Content}
+          tableData={filteredTableData}
+          selectedOption={selectedOption}
+          average_price={searchTerm ? averagePrice : ""}
+          highest_price={searchTerm ? highestPrice : ""}
+          highest_price_date={searchTerm ? highestPriceDate : ""}
+          lowest_price={searchTerm ? lowestPrice : ""}
+          lowest_price_date={searchTerm ? lowestPriceDate : ""}
+          average_price_quantity={searchTerm ? averagePriceQTY : ""}
+          total_no_of_orders={searchTerm ? totalNoOfOrders : ""}
+          bestBuyProducts={bestBuyProducts}
+          bestBuySupplierCode={bestBuySupplierCode}
+        />
+      ))}
+    </div>
+
+  
 
     
 
-      <div className="mb-3 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
+      <div className="mb-8 grid grid-cols-1 gap-y-8 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props) => (
           props.title !== "Average prices for the period" && (
             <StatisticsChart
