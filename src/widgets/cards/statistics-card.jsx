@@ -123,14 +123,21 @@ export function StatisticsCard({
           <div>
             <div className='mb-5'>
               <label className="block text-sm font-medium text-black mb-2">
-                {selectedOption === "allSuppliers" ? "Best Buy Product" : "Best Buy Product"}
+                {selectedOption === "allSuppliers" ? "Best Buy Product" : "Best Buy Supplier"}
               </label>
               <input
                 type="text"
                 className="mt-1 block w-full xl:h-1/3 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
-                value={selectedOption === "allSuppliers" ? bestBuySupplierCode : bestBuyProducts}
+                value={selectedOption === "allSuppliers" ? bestBuyProducts : bestBuySupplierCode}
                 readOnly
               />
+              <br />
+              {/* <input
+                type="text"
+                className="mt-1 block w-full xl:h-1/3 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
+                value={selectedOption === "allSuppliers" ?  bestBuyProducts : bestBuySupplierCode}
+                readOnly
+              /> */}
             </div>
           </div>
         )}

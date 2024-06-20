@@ -22,8 +22,26 @@ import Chart from "react-apexcharts";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { chartsConfig } from "@/configs";
+import {
+  All_Products_URL,
+  All_Suppliers_URL,
+  Best_Buy_Supplier_URL,
+  Analytics_Price_URL,
+  Average_Purchase_Quantity_URL,
+  Total_Orders_URL,
+  Most_Supplied_Suppliers_URL,
+  Best_Buy_Products_URL,
+  Maximum_Orders_URL,
+  Average_Price_Period_URL
+} from "../../../config";
 
 export function Home() {
+
+  // api urls
+
+  const getallproductsurl = `${All_Products_URL}`;
+  const getallsuppliersurl = `${All_Suppliers_URL}`;
+  
 
   const [toggle, setToggle] = useState();
 
@@ -69,16 +87,6 @@ const priceHikeChart = {
   },
 };
 
-// const productPurchaseAuditChart = (data) => ({
-//   type: "donut",
-//   height: 220,
-//   series: data.series,
-//   options: {
-//     ...chartsConfig,
-//     colors: ["#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#FFCD56", "#C9CBCF", "#36A2EB"],
-//     labels: data.labels,
-//   },
-// });
 
 const productPurchaseAuditChart = {
   type: "donut",
@@ -91,24 +99,34 @@ const productPurchaseAuditChart = {
   },
 };
 
+
+const pyramidChartTemplate = {
+  type: "pyramid",
+  height: 220,
+  series: [],
+  options: {
+    ...chartsConfig,
+    labels: [],
+    colors: ["#FF4560", "#008FFB", "#00E396", "#FEB019", "#775DD0", "#3F51B5"],
+    chart: {
+      background: '#f4f4f4',
+    },
+    legend: {
+      position: 'bottom'
+    },
+    plotOptions: {
+      pyramid: {
+        dataLabels: {
+          enabled: true
+        }
+      }
+    }
+  }
+};
+
+
+
   const [statisticsChartsData, setStatisticsChartsData] = useState([
-    // {
-    //   color: "white",
-    //   title: (
-    //     <div className="flex justify-between items-center w-full">
-    //       <Typography variant="h6" color="blue-gray">
-    //         Best Buy Supplier
-    //       </Typography>
-    //       <Switch
-    //         color="blue"
-    //         checked={toggle}
-    //         onChange={() => setToggle(!toggle)}
-    //       />
-    //     </div>
-    //   ),
-    //   description: "",
-    //   chart: bestBuySupplierChartTemplate,
-    // },
     {
       color: "white",
       title: "Best Buy Supplier",
@@ -128,6 +146,12 @@ const productPurchaseAuditChart = {
       chart: productPurchaseAuditChart,
       //chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
     },
+    // {
+    //   color: "white",
+    //   title: "Pyramid Chart",
+    //   description: "",
+    //   chart: pyramidChartTemplate,
+    // },
   ]);
 
   const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');
@@ -169,16 +193,28 @@ const productPurchaseAuditChart = {
     fetchProducts();
   }, []);
 
+  useEffect(()=>{
+    if(fromDate && toDate && searchTerm && viewCount){
+      fetchPyramidChartData();
+    }
+   
+  },[fromDate, toDate, searchTerm, viewCount]);
+
   useEffect(() => {
     if (fromDate && toDate && searchTerm && basedOn && viewCount) {
       fetchData();
-      //fetchChartData();
     }
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
 
   useEffect(() => {
-    fetchChartData();
-  }, []);
+    if (fromDate && toDate && searchTerm && basedOn) {
+      fetchChartData();
+    }
+  }, [fromDate, toDate, searchTerm, basedOn]);
+
+  // useEffect(() => {
+  //   fetchChartData();
+  // }, []);
 
   useEffect(() => {
     fetchProducts(selectedOption);
@@ -206,11 +242,13 @@ const productPurchaseAuditChart = {
     }
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
   
+  
+
 
   const fetchProducts = async () => {
     try {
-      const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getallproducts`;
-      const response = await axios.get(url);
+      
+      const response = await axios.get(getallproductsurl);
       const products = response.data.products.map((product) => ({
         value: product.catlogCode,
         label: product.catlogCode,
@@ -244,22 +282,26 @@ const productPurchaseAuditChart = {
       const isBasedOnValue = basedOn === 'value';
       const isBasedOnQty = basedOn === 'qty';
   
-      const response = await axios.get(`https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm ? searchTerm.value : ''}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`);
+      const response = await axios.get(`${Best_Buy_Supplier_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm ? searchTerm.value : ''}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`);
       
       const dashboardModels = response.data.dashboardModels;
   
       let yAxisData;
       let yAxisLabel;
+      let maxSupplierCode = '';
   
       if (isBasedOnInvoiceCount) {
         yAxisData = dashboardModels.map(item => item.invoiceCount);
         yAxisLabel = "Invoice Count";
+        maxSupplierCode = dashboardModels.reduce((max, item) => item.invoiceCount > max.invoiceCount ? item : max, dashboardModels[0]).supplierCode;
       } else if (isBasedOnValue) {
         yAxisData = dashboardModels.map(item => item.totalAmount);
         yAxisLabel = "Total Amount";
+        maxSupplierCode = dashboardModels.reduce((max, item) => item.totalAmount > max.totalAmount ? item : max, dashboardModels[0]).supplierCode;
       } else if (isBasedOnQty) {
         yAxisData = dashboardModels.map(item => item.totalQuantity);
         yAxisLabel = "Total Quantity";
+        maxSupplierCode = dashboardModels.reduce((max, item) => item.totalQuantity > max.totalQuantity ? item : max, dashboardModels[0]).supplierCode;
       }
   
       const supplierCodes = dashboardModels.map(item => item.supplierCode);
@@ -289,6 +331,17 @@ const productPurchaseAuditChart = {
           return chartData;
         })
       );
+  
+      // Set the best buy supplier code based on the maximum value logic
+      setBestBuySupplierCode(maxSupplierCode);
+  
+      // Fetch best buy products data
+      // const bestBuyProductsUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestbuyproducts?from=${fromDate}&to=${toDate}&viewCount=5`;
+      // const bestBuyProductsResponse = await axios.get(bestBuyProductsUrl);
+      // const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
+      // const highestProduct = bestBuyProducts.reduce((max, product) => product.OrderQty > max.OrderQty ? product : max, bestBuyProducts[0]);
+      // setBestBuyProducts(highestProduct.catlogCode);
+  
     } catch (error) {
       console.error("Error fetching chart data:", error);
     }
@@ -297,11 +350,13 @@ const productPurchaseAuditChart = {
   
   
   
+  
+  
   //pie chart api fetching function
 
   const fetchProductPurchaseAuditData = async () => {
     try {
-      const response = await axios.get(`https://testportalapi.egansgroup.com.au/api/bestsupplier/getmaximumordersforproducts?from=${fromDate}&to=${toDate}&viewCount=${viewCount}`);
+      const response = await axios.get(`${Maximum_Orders_URL}?from=${fromDate}&to=${toDate}&viewCount=${viewCount}`);
   
       const maxOrderQtyData = response.data.maxOrderQty;
   
@@ -353,39 +408,42 @@ const productPurchaseAuditChart = {
   
 
   const fetchData = async () => {
+    // if (selectedOption === "allSuppliers") {
+    //   // Do not fetch product-specific data if "All Suppliers" is selected
+    //   return;
+    // }
+
     const isBasedOnInvoiceCount = basedOn === 'count';
     const isBasedOnValue = basedOn === 'value';
     const isBasedOnQty = basedOn === 'qty';
   
-    const bestSupplierUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
-    const analyticsPriceUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getanalyticspriceforproduct?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
-    const avgPurchaseQtyUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getaveragepurchasequantity?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
-    const totalOrdersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/gettotalnooforders?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
-    const mostSuppliedSuppliersUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductmostsuppliedsupplier?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
-    const bestBuyProductsUrl = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getbestbuyproducts?from=${fromDate}&to=${toDate}&viewCount=5`;
+    const bestSupplierUrl = `${Best_Buy_Supplier_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&isBasedOnInvoiceCount=${isBasedOnInvoiceCount}&isBasedOnValue=${isBasedOnValue}&isBasedOnQty=${isBasedOnQty}&viewCount=${viewCount}`;
+    const analyticsPriceUrl = `${Analytics_Price_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
+    const avgPurchaseQtyUrl = `${Average_Purchase_Quantity_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
+    const totalOrdersUrl = `${Total_Orders_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`;
+    const mostSuppliedSuppliersUrl = `${Most_Supplied_Suppliers_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`;
     
-  try {
-    const [
-      bestSupplierResponse,
-      analyticsPriceResponse,
-      avgPurchaseQtyResponse,
-      totalOrdersResponse,
-      mostSuppliedSuppliersResponse,
-      bestBuyProductsResponse
-    ] = await Promise.all([
-      axios.get(bestSupplierUrl),
-      axios.get(analyticsPriceUrl),
-      axios.get(avgPurchaseQtyUrl),
-      axios.get(totalOrdersUrl),
-      axios.get(mostSuppliedSuppliersUrl),
-      axios.get(bestBuyProductsUrl)
-    ]);
 
+    try {
+      const [
+        bestSupplierResponse,
+        analyticsPriceResponse,
+        avgPurchaseQtyResponse,
+        totalOrdersResponse,
+        mostSuppliedSuppliersResponse,
+      ] = await Promise.all([
+        axios.get(bestSupplierUrl),
+        axios.get(analyticsPriceUrl),
+        axios.get(avgPurchaseQtyUrl),
+        axios.get(totalOrdersUrl),
+        axios.get(mostSuppliedSuppliersUrl),
+      ]);
+  
       // Handle best supplier data
       const bestSupplierData = bestSupplierResponse.data.dashboardModels;
       const categories = bestSupplierData.map(item => item.supplierCode);
       const series = bestSupplierData.map(item => item.totalAmount);
-
+  
       setBestBuySupplierChartState({
         ...bestBuySupplierChartTemplate,
         series: [{ name: "Purchases", data: series }],
@@ -394,7 +452,7 @@ const productPurchaseAuditChart = {
           xaxis: { categories },
         },
       });
-
+  
       // Handle analytics price data
       const analyticsPriceData = analyticsPriceResponse.data.DashboardPrices[0];
       setAveragePrice(analyticsPriceData.avgPrice.toFixed(2));
@@ -402,26 +460,32 @@ const productPurchaseAuditChart = {
       setHighestPriceDate(analyticsPriceData.maxPriceDate);
       setLowestPrice(analyticsPriceData.minPrice);
       setLowestPriceDate(analyticsPriceData.minPriceDate);
-
+  
       // Handle average purchase quantity data
       const avgPurchaseQtyData = avgPurchaseQtyResponse.data.avgPurchaseQty[0];
       setAveragePriceQTY(avgPurchaseQtyData.avgPurchaseQty.toFixed(2));
-
+  
       // Handle total orders data
       const totalOrdersData = totalOrdersResponse.data.totNoOfOrders[0];
       setTotalNoOfOrders(totalOrdersData.totalOrders);
-
-      // Handle most supplied suppliers data
+  
+      
       const mostSuppliedSuppliersData = mostSuppliedSuppliersResponse.data.mostSuppliedSupplierss.map((supplier) => ({
         code: supplier.supplierCode,
         description: supplier.totalSupplied
       }));
       setTableData(mostSuppliedSuppliersData);
-      console.log("Most Supplied Suppliers Data:", mostSuppliedSuppliersData);
       if (mostSuppliedSuppliersData.length > 0) {
         setBestBuySupplierCode(mostSuppliedSuppliersData[0].code);
-        console.log("Set Best Buy Supplier:", mostSuppliedSuppliersData[0].code);
       }
+
+      // const bestSupplierData = bestSupplierResponse.data.mostSuppliedSupplierss.map((supplier) => ({
+      //   code: supplier.supplierCode,
+      //   description: supplier.totalSupplied
+      // }));
+      // if (mostSuppliedSuppliersData.length > 0) {
+      //   setBestBuySupplierCode(mostSuppliedSuppliersData[0].code);
+      // }
   
       // Handle best buy products data
       const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
@@ -450,9 +514,44 @@ const productPurchaseAuditChart = {
   };
 
 
+  const fetchPyramidChartData = async () => {
+    try {
+      const response = await axios.get(`${Most_Supplied_Suppliers_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`);
+      
+      const pyramidData = response.data.mostSuppliedSupplierss;
+  
+      // Sort data to have the most supplied supplier at the bottom
+      pyramidData.sort((a, b) => a.totalSupplied - b.totalSupplied);
+  
+      const seriesData = pyramidData.map(item => item.totalSupplied);
+      const labels = pyramidData.map(item => item.supplierCode);
+  
+      const updatedChartState = {
+        ...pyramidChartTemplate,
+        series: seriesData,
+        options: {
+          ...pyramidChartTemplate.options,
+          labels: labels
+        }
+      };
+  
+      setStatisticsChartsData(prevState => 
+        prevState.map(chartData => 
+          chartData.title === "Pyramid Chart"
+            ? { ...chartData, chart: updatedChartState }
+            : chartData
+        )
+      );
+    } catch (error) {
+      console.error("Error fetching pyramid chart data:", error);
+    }
+  };
+  
+
+
   const fetchAveragePricesData = async (timeFrameType) => {
     try {
-      const url = `https://testportalapi.egansgroup.com.au/api/bestsupplier/getproductaveragepriceforaperiod?productCode=${searchTerm.value}&type=${selectedTimeFrame}&value=${toDate}`;
+      const url = `${Average_Price_Period_URL}?productCode=${searchTerm.value}&type=${selectedTimeFrame}&value=${toDate}`;
       const response = await axios.get(url);
       const productAveragePrices = response.data.productAveragePrices;
   
@@ -576,7 +675,7 @@ const productPurchaseAuditChart = {
           <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Product/Supplier </label>
           <select className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" value={selectedOption} onChange={handleOptionChange}>
             <option value="allProducts">All Products</option>
-            <option value="allSuppliers">All Suppliers</option>
+            {/* <option value="allSuppliers">All Suppliers</option> */}
           </select>
         </Card>
         {/* <Card className="bg-gray-200" style={{ backgroundColor: '#FFF3B0' }}> */}
@@ -665,6 +764,8 @@ const productPurchaseAuditChart = {
     />
   ))}
 </div>
+
+    
 
       <div className="mb-3 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props) => (
