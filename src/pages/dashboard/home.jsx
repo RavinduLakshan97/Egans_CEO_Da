@@ -15,7 +15,7 @@ import {
 } from "@material-tailwind/react";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
-import { statisticsCardsData } from "@/data";
+
 import axios from "axios";
 import moment from "moment";
 import Chart from "react-apexcharts";
@@ -40,7 +40,7 @@ export function Home() {
   // api urls
 
   const getallproductsurl = `${All_Products_URL}`;
-  const getallsuppliersurl = `${All_Suppliers_URL}`;
+  
   
 
   const [toggle, setToggle] = useState();
@@ -100,31 +100,82 @@ const productPurchaseAuditChart = {
 };
 
 
-const pyramidChartTemplate = {
-  type: "pyramid",
-  height: 220,
-  series: [],
+const radialBarChartTemplate = {
+  type: "radialBar",
+  height: 280,  // Adjust height as needed
+  series: [],  
   options: {
-    ...chartsConfig,
-    labels: [],
-    colors: ["#FF4560", "#008FFB", "#00E396", "#FEB019", "#775DD0", "#3F51B5"],
     chart: {
-      background: '#f4f4f4',
-    },
-    legend: {
-      position: 'bottom'
+      height: 280,  // Adjust height as needed
+      type: 'radialBar',
     },
     plotOptions: {
-      pyramid: {
+      radialBar: {
+        hollow: {
+          margin: 5,
+          size: '30%',
+          background: 'transparent',
+        },
         dataLabels: {
-          enabled: true
+          total: {
+            show: true,
+            label: 'TOTAL',
+            formatter: () => '0'
+          },
+          value: {
+            formatter: (val) => `${val.toFixed(2)}%`
+          }
+        }
+      }
+    },
+    labels: [],  // Initially empty, will be populated with fetched data
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return `${val.toFixed(2)}%`;
         }
       }
     }
-  }
+  },
 };
 
 
+const [statisticsCardsData, setStatisticsCardsData] = useState([
+  {
+    color: "gray",
+    backgroundColor: "bg-custom-yellow",
+    average_price: "Average price",
+    value: "2,300",
+    footer: {
+      color: "text-green-500",
+      value: "+3%",
+      label: "than last month",
+    },
+    showCustomFields: true,
+  },
+  {
+    color: "gray",
+    backgroundColor: "bg-custom-green",
+    value: "3,462",
+    footer: {
+      color: "text-red-500",
+      value: "-2%",
+      label: "than yesterday",
+    },
+    showOrderStats: true,
+  },
+  // Add the chart card here
+  {
+    color: "gray",
+    backgroundColor: "white",
+    titles: "Most Supplied Suppliers",
+    chart: radialBarChartTemplate,
+    showChart: true,
+    span: 2 ,
+    
+    
+  },
+]);
 
   const [statisticsChartsData, setStatisticsChartsData] = useState([
     {
@@ -193,12 +244,12 @@ const pyramidChartTemplate = {
     fetchProducts();
   }, []);
 
-  useEffect(()=>{
-    if(fromDate && toDate && searchTerm && viewCount){
-      fetchPyramidChartData();
+  useEffect(() => {
+    if (fromDate && toDate && searchTerm && viewCount) {
+      fetchRadialBarChartData();
     }
-   
-  },[fromDate, toDate, searchTerm, viewCount]);
+  }, [fromDate, toDate, searchTerm, viewCount]);
+  
 
   useEffect(() => {
     if (fromDate && toDate && searchTerm && basedOn && viewCount) {
@@ -346,6 +397,83 @@ const pyramidChartTemplate = {
       console.error("Error fetching chart data:", error);
     }
   };
+  
+  
+  
+  const fetchRadialBarChartData = async () => {
+    try {
+      const response = await axios.get(`${Most_Supplied_Suppliers_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm ? searchTerm.value : ''}&viewCount=${viewCount}`);
+      
+      console.log('API Response:', response.data);
+  
+      const mostSuppliedSuppliers = response.data.mostSuppliedSupplierss;
+      const radialBarData = mostSuppliedSuppliers.map(item => item.totalSupplied);
+      const labels = mostSuppliedSuppliers.map(item => item.supplierCode);
+  
+      // Calculate totalSupplied
+      const totalSupplied = radialBarData.reduce((total, amount) => total + amount, 0);
+  
+      // Normalize data
+      const normalizedRadialBarData = radialBarData.map(value => (value / totalSupplied) * 100);
+  
+      console.log('Radial Bar Data:', radialBarData);
+      console.log('Normalized Radial Bar Data:', normalizedRadialBarData);
+      console.log('Labels:', labels);
+      console.log('Total Supplied:', totalSupplied);
+  
+      const updatedChartState = {
+        ...radialBarChartTemplate,
+        series: normalizedRadialBarData,
+        options: {
+          ...radialBarChartTemplate.options,
+          labels: labels,
+          plotOptions: {
+            radialBar: {
+              hollow: {
+                margin: 5,
+                size: '30%',
+                background: 'transparent',
+              },
+              dataLabels: {
+                total: {
+                  show: true,
+                  label: 'TOTAL',
+                  formatter: () => `${totalSupplied.toFixed(2)}`
+                },
+                value: {
+                  formatter: (val) => `${(val / 100 * totalSupplied).toFixed(2)}`
+                }
+              }
+            }
+          },
+          tooltip: {
+            y: {
+              formatter: function (val) {
+                return `${val.toFixed(2)}%`;
+              }
+            }
+          }
+        }
+      };
+  
+      console.log('Updated Chart State:', updatedChartState);
+  
+      setStatisticsCardsData (prevState => 
+        prevState.map(chartData => 
+          chartData.titles === "Most Supplied Suppliers"
+            ? { ...chartData, chart: updatedChartState }
+            : chartData
+        )
+      );
+    } catch (error) {
+      console.error("Error fetching radial bar chart data:", error);
+    }
+  };
+  
+  
+  
+  
+  
   
   
   
@@ -513,40 +641,6 @@ const pyramidChartTemplate = {
     // Update card contents based on the selected option
   };
 
-
-  const fetchPyramidChartData = async () => {
-    try {
-      const response = await axios.get(`${Most_Supplied_Suppliers_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`);
-      
-      const pyramidData = response.data.mostSuppliedSupplierss;
-  
-      // Sort data to have the most supplied supplier at the bottom
-      pyramidData.sort((a, b) => a.totalSupplied - b.totalSupplied);
-  
-      const seriesData = pyramidData.map(item => item.totalSupplied);
-      const labels = pyramidData.map(item => item.supplierCode);
-  
-      const updatedChartState = {
-        ...pyramidChartTemplate,
-        series: seriesData,
-        options: {
-          ...pyramidChartTemplate.options,
-          labels: labels
-        }
-      };
-  
-      setStatisticsChartsData(prevState => 
-        prevState.map(chartData => 
-          chartData.title === "Pyramid Chart"
-            ? { ...chartData, chart: updatedChartState }
-            : chartData
-        )
-      );
-    } catch (error) {
-      console.error("Error fetching pyramid chart data:", error);
-    }
-  };
-  
 
 
   const fetchAveragePricesData = async (timeFrameType) => {

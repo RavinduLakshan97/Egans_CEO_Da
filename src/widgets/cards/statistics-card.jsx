@@ -1,11 +1,12 @@
 import React from "react";
 import { Card, CardBody, Typography } from "@material-tailwind/react";
 import PropTypes from "prop-types";
+import Chart from "react-apexcharts";
 
 export function StatisticsCard({
   color,
   icon,
-  title,
+  titles,
   footer,
   showCustomFields = false,
   showOrderStats = false,
@@ -25,12 +26,15 @@ export function StatisticsCard({
   total_no_of_orders,
   bestBuyProducts,
   bestBuySupplierCode,
+  chart,
+  showChart,
+  span = 1, // New prop to determine the span of the card
   ...rest
 }) {
   return (
-    <Card className={`border border-blue-gray-100 shadow-sm ${backgroundColor}`}>
+    <Card className={`border border-blue-gray-100 shadow-sm ${backgroundColor} ${span === 2 ? "col-span-2" : ""}`}>
       <CardBody className="p-4 text-left">
-        <Typography variant="small" className="font-normal text-blue-gray-600">{title}</Typography>
+       
         {showCustomFields && (
           <div>
             <div className="mb-4">
@@ -92,36 +96,7 @@ export function StatisticsCard({
                 value={total_no_of_orders}
               />
             </div>
-          </div>
-        )}
-        {showProductStats && (
-          <div>
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-black mb-2">
-                {selectedOption === "allSuppliers" ? "Most Supplied Products" : "Most Supplied Suppliers"}
-              </label>
-              <table className="min-w-full bg-white rounded-lg">
-                <thead>
-                  <tr>
-                    <th className="py-1 text-xs">{selectedOption === "allSuppliers" ? "Product Code" : "Supplier Code"}</th>
-                    <th className="py-1 text-xs">Total Supplied Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.map((row, index) => (
-                    <tr key={index}>
-                      <td className="border px-2 py-1 text-xs">{row.code}</td>
-                      <td className="border px-2 py-1 text-xs">{row.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        {showMostPurchaseProductSupplier && (
-          <div>
-            <div className='mb-5'>
+            <div className="mb-4">
               <label className="block text-sm font-medium text-black mb-2">
                 {selectedOption === "allSuppliers" ? "Best Buy Product" : "Best Buy Supplier"}
               </label>
@@ -131,16 +106,20 @@ export function StatisticsCard({
                 value={selectedOption === "allSuppliers" ? bestBuyProducts : bestBuySupplierCode}
                 readOnly
               />
-              <br />
-              {/* <input
-                type="text"
-                className="mt-1 block w-full xl:h-1/3 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
-                value={selectedOption === "allSuppliers" ?  bestBuyProducts : bestBuySupplierCode}
-                readOnly
-              /> */}
             </div>
           </div>
         )}
+        {showChart && chart && (
+          <div className="card-chart mt-4">
+            <Chart {...chart} />
+          </div>
+        )}
+        {footer && (
+          <div className="card-footer mt-2">
+            <p className={`text-${footer.color}`}>{footer.value} {footer.label}</p>
+          </div>
+        )}
+         <Typography variant="h6" color="blue-gray">{titles}</Typography>
       </CardBody>
     </Card>
   );
@@ -153,9 +132,9 @@ StatisticsCard.defaultProps = {
 
 StatisticsCard.propTypes = {
   color: PropTypes.oneOf(["white", "blue-gray", "gray", "brown", "deep-orange", "orange", "amber", "yellow", "lime", "light-green", "green", "teal", "cyan", "light-blue", "blue", "indigo", "deep-purple", "purple", "pink", "red"]),
-  icon: PropTypes.node.isRequired,
-  title: PropTypes.node.isRequired,
-  value: PropTypes.node.isRequired,
+  icon: PropTypes.node,
+  titles: PropTypes.node.isRequired,
+  value: PropTypes.node,
   footer: PropTypes.node,
   showDatePickers: PropTypes.bool,
   showCustomFields: PropTypes.bool,
@@ -171,6 +150,9 @@ StatisticsCard.propTypes = {
   highest_price_date: PropTypes.string,
   lowest_price: PropTypes.string,
   lowest_price_date: PropTypes.string,
+  chart: PropTypes.object,
+  showChart: PropTypes.bool,
+  span: PropTypes.number, // Add this prop type
 };
 
 StatisticsCard.displayName = "/src/widgets/cards/statistics-card.jsx";
