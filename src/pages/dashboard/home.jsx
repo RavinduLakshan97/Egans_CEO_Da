@@ -257,11 +257,11 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     }
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
 
-  useEffect(() => {
-    if (fromDate && toDate && searchTerm && basedOn) {
-      fetchChartData();
-    }
-  }, [fromDate, toDate, searchTerm, basedOn]);
+  // useEffect(() => {
+  //   if (fromDate && toDate && searchTerm && basedOn) {
+  //     fetchChartData();
+  //   }
+  // }, [fromDate, toDate, searchTerm, basedOn]);
 
   // useEffect(() => {
   //   fetchChartData();
@@ -784,7 +784,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
         </select>
       </Card>
       <Card className="bg-gray-200">
-        <div className="mr-auto md:mr-4 md:w-56 mt-3 ml-2">
+        <div className="mr-auto md:mr-4 md:w-45 mt-3 ml-2">
           <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
           <Select
             className="mb-3"
