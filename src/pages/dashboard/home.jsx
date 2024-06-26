@@ -5,16 +5,13 @@ import {
   Card,
   CardHeader,
   CardBody,
-  Input,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
   Button,
+  IconButton,
   Switch
 } from "@material-tailwind/react";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
+import { FunnelIcon } from '@heroicons/react/24/outline';
 
 import axios from "axios";
 import moment from "moment";
@@ -24,13 +21,11 @@ import 'rc-slider/assets/index.css';
 import { chartsConfig } from "@/configs";
 import {
   All_Products_URL,
-  All_Suppliers_URL,
   Best_Buy_Supplier_URL,
   Analytics_Price_URL,
   Average_Purchase_Quantity_URL,
   Total_Orders_URL,
   Most_Supplied_Suppliers_URL,
-  Best_Buy_Products_URL,
   Maximum_Orders_URL,
   Average_Price_Period_URL
 } from "../../../config";
@@ -40,10 +35,6 @@ export function Home() {
   // api urls
 
   const getallproductsurl = `${All_Products_URL}`;
-  
-  
-
-  const [toggle, setToggle] = useState();
 
   const bestBuySupplierChartTemplate = {
     type: "bar",
@@ -102,11 +93,11 @@ const productPurchaseAuditChart = {
 
 const radialBarChartTemplate = {
   type: "radialBar",
-  height: 280,  // Adjust height as needed
+  height: 280,  
   series: [],  
   options: {
     chart: {
-      height: 280,  // Adjust height as needed
+      height: 280,  
       type: 'radialBar',
     },
     plotOptions: {
@@ -128,7 +119,7 @@ const radialBarChartTemplate = {
         }
       }
     },
-    labels: [],  // Initially empty, will be populated with fetched data
+    labels: [], 
     tooltip: {
       y: {
         formatter: function (val) {
@@ -164,7 +155,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     },
     showOrderStats: true,
   },
-  // Add the chart card here
+  // Add the chart cards here
   {
     color: "gray",
     backgroundColor: "white",
@@ -195,7 +186,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       title: "Maximum Orders For Products",
       description: "",
       chart: productPurchaseAuditChart,
-      //chart: productPurchaseAuditChart({ series: [30, 26, 25], labels: ["CENCOBV0", "STACAMV0", "RICKEIV0"] }),
     },
     // {
     //   color: "white",
@@ -216,7 +206,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [basedOn, setBasedOn] = useState('value');
   const [viewCount, setViewCount] = useState(3);
-  //const [chartData, setChartData] = useState(bestBuySupplierChartTemplate);
   const [bestBuySupplierChartState, setBestBuySupplierChartState] = useState(bestBuySupplierChartTemplate);
 
   // New state variables for the new API data
@@ -229,15 +218,12 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   const [totalNoOfOrders, setTotalNoOfOrders] = useState("");
   const [bestBuyProducts, setBestBuyProducts] = useState([]);
   const [bestBuySupplierCode, setBestBuySupplierCode] = useState([]);
-
-  const [card3Content, setCard3Content] = useState("");
-  const [card4Content, setCard4Content] = useState("");
   const [tableData, setTableData] = useState([]);
   const [filteredTableData, setFilteredTableData] = useState([]);
 
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('year');
   const [priceHikeChartData, setPriceHikeChartData] = useState(statisticsChartsData[1].chart);
-  const [productPurchaseAuditChartState, setProductPurchaseAuditChartState] = useState(productPurchaseAuditChart);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
 
   useEffect(() => {
@@ -257,16 +243,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     }
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
 
-  // useEffect(() => {
-  //   if (fromDate && toDate && searchTerm && basedOn) {
-  //     fetchChartData();
-  //   }
-  // }, [fromDate, toDate, searchTerm, basedOn]);
-
-  // useEffect(() => {
-  //   fetchChartData();
-  // }, []);
-
   useEffect(() => {
     fetchProducts(selectedOption);
     updateCardContents(selectedOption);
@@ -284,7 +260,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     if(fromDate && toDate && viewCount){
       fetchProductPurchaseAuditData();
     }
-    
   }, [fromDate,toDate,viewCount]);
 
   useEffect(() => {
@@ -294,11 +269,8 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
   
   
-
-
   const fetchProducts = async () => {
-    try {
-      
+    try {   
       const response = await axios.get(getallproductsurl);
       const products = response.data.products.map((product) => ({
         value: product.catlogCode,
@@ -471,15 +443,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   };
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
   //pie chart api fetching function
 
   const fetchProductPurchaseAuditData = async () => {
@@ -534,12 +497,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   
   
   
-
   const fetchData = async () => {
-    // if (selectedOption === "allSuppliers") {
-    //   // Do not fetch product-specific data if "All Suppliers" is selected
-    //   return;
-    // }
 
     const isBasedOnInvoiceCount = basedOn === 'count';
     const isBasedOnValue = basedOn === 'value';
@@ -605,15 +563,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       setTableData(mostSuppliedSuppliersData);
       if (mostSuppliedSuppliersData.length > 0) {
         setBestBuySupplierCode(mostSuppliedSuppliersData[0].code);
-      }
-
-      // const bestSupplierData = bestSupplierResponse.data.mostSuppliedSupplierss.map((supplier) => ({
-      //   code: supplier.supplierCode,
-      //   description: supplier.totalSupplied
-      // }));
-      // if (mostSuppliedSuppliersData.length > 0) {
-      //   setBestBuySupplierCode(mostSuppliedSuppliersData[0].code);
-      // }
+      }   
   
       // Handle best buy products data
       const bestBuyProducts = bestBuyProductsResponse.data.BestBuyProducts;
@@ -640,7 +590,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   const updateCardContents = (option) => {
     // Update card contents based on the selected option
   };
-
 
 
   const fetchAveragePricesData = async (timeFrameType) => {
@@ -681,36 +630,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
   };
 
 
-  const getHoverContent = (seriesIndex, dataPointIndex, series) => {
-    const month = moment().isoWeek(dataPointIndex + 1).format('MMM');
-    const day = moment().isoWeek(dataPointIndex + 1).day(dataPointIndex).format('dddd');
-    const year = moment().subtract(dataPointIndex, 'years').format('YYYY');
-    
-    let content = '';
-    if (selectedTimeFrame === 'day') {
-      content = `<div class="arrow_box">
-          <span>${day}</span>
-          <br/>
-          <label>Purchases: </label>
-          <span>${series[seriesIndex][dataPointIndex]}</span>
-        </div>`;
-    } else if (selectedTimeFrame === 'week' || selectedTimeFrame === 'month') {
-      content = `<div class="arrow_box">
-          <span>${month}</span>
-          <br/>
-          <label>Purchases: </label>
-          <span>${series[seriesIndex][dataPointIndex]}</span>
-        </div>`;
-    } else if (selectedTimeFrame === 'year') {
-      content = `<div class="arrow_box">
-          <span>${year}</span>
-          <br/>
-          <label>Purchases: </label>
-          <span>${series[seriesIndex][dataPointIndex]}</span>
-        </div>`;
-    }
-    return content;
-  };
 
   const updatePriceHikeChart = (timeFrame) => {
     let timeFrameType;
@@ -752,106 +671,116 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
 
   return (
     <div className="mt-5">
-    <div className="mb-7 grid gap-y-5 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-      <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200">
-        <div className="px-1 mt-3 grid grid-cols-1">      
-          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> From </label> 
-          <input 
-            type="date" 
-            className="mb-2 md:mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" 
-            value={fromDate} 
-            onChange={(e) => setFromDate(e.target.value)}
-          />     
-        </div>
-        <div className="px-1 mt-3 grid grid-cols-1">      
-          <label className="block text-sm font-medium text-black mb-0 mt-1 px-1"> To </label>
-          <input 
-            type="date" 
-            className="mb-2 md:mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md" 
-            value={toDate} 
-            onChange={(e) => setToDate(e.target.value)}
-          />     
-        </div>
-      </Card>
-      <Card className="bg-gray-200">
-        <label className="block text-sm font-medium text-black mb-2 mt-3 px-4"> All Product/Supplier </label>
-        <select 
-          className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3" 
-          value={selectedOption} 
-          onChange={handleOptionChange}
-        >
-          <option value="allProducts">All Products</option>
-        </select>
-      </Card>
-      <Card className="bg-gray-200">
-        <div className="mr-auto md:mr-4 md:w-45 mt-3 ml-2">
-          <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
-          <Select
-            className="mb-3"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            options={filteredProducts}
-            isClearable
-          />
-        </div>
-      </Card>
-      <Card className="bg-gray-200 mb-2">
-        <div className="flex-1 mt-3 ml-2">
-          <label className="block text-sm font-medium text-black mb-2">View Count</label>
-          <Slider
-            className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100" 
-            min={1}
-            max={5}
-            valueLabelDisplay="auto"
-            keyboard
-            value={viewCount}
-            onChange={value => setViewCount(value)}
-            trackStyle={customSliderStyles.trackStyle}
-            handleStyle={customSliderStyles.handleStyle}
-            railStyle={customSliderStyles.railStyle}
-          />
-        </div>
-        <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
-        <div className="flex items-center space-x-6 ml-2 mb-2">
-          <div>
-            <input 
-              className="mr-1" 
-              type="radio" 
-              id="value" 
-              name="basedOn" 
-              value="value" 
-              checked={basedOn === 'value'} 
-              onChange={(e) => setBasedOn(e.target.value)} 
-            />
-            <label htmlFor="value" className="text-black">Value</label>
-          </div>
-          <div>
-            <input 
-              className="mr-1" 
-              type="radio" 
-              id="qty" 
-              name="basedOn" 
-              value="qty" 
-              checked={basedOn === 'qty'} 
-              onChange={(e) => setBasedOn(e.target.value)} 
-            />
-            <label htmlFor="qty" className="text-black">Quantity</label>
-          </div>
-          <div>
-            <input 
-              className="mr-1" 
-              type="radio" 
-              id="count" 
-              name="basedOn" 
-              value="count" 
-              checked={basedOn === 'count'} 
-              onChange={(e) => setBasedOn(e.target.value)} 
-            />
-            <label htmlFor="count" className="text-black">Count</label>
-          </div>
-        </div>
-      </Card>
+      <IconButton
+        variant="text"
+        color="black"
+        className={`mb-2 rounded-full grid xl:hidden ${isDrawerOpen ? 'bg-black text-white' : 'bg-gray-400 text-black'}`}
+        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+      >
+        <FunnelIcon className={`h-5 w-5 ${isDrawerOpen ? 'text-white' : 'text-black'}`} />
+      </IconButton>
+
+    <div className={`mb-7 grid gap-y-5 gap-x-6 md:grid-cols-2 xl:grid-cols-4 ${isDrawerOpen ? 'block' : 'hidden lg:grid'}`}>
+  <Card className="grid xl:grid-cols-2 border border-blue-gray-100 shadow-sm bg-gray-200">
+    <div className="px-1 mt-3 grid grid-cols-1">
+      <label className="block text-sm font-medium text-black mb-0 mt-1 px-1">From</label>
+      <input
+        type="date"
+        className="mb-2 md:mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md"
+        value={fromDate}
+        onChange={(e) => setFromDate(e.target.value)}
+      />
     </div>
+    <div className="px-1 mt-3 grid grid-cols-1">
+      <label className="block text-sm font-medium text-black mb-0 mt-1 px-1">To</label>
+      <input
+        type="date"
+        className="mb-2 md:mb-14 width-full border-blue-gray-100 shadow-sm px-4 rounded-md"
+        value={toDate}
+        onChange={(e) => setToDate(e.target.value)}
+      />
+    </div>
+  </Card>
+  <Card className="bg-gray-200">
+    <label className="block text-sm font-medium text-black mb-2 mt-3 px-4">All Product/Supplier</label>
+    <select
+      className="block w-2/3 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-gray-600 ml-3"
+      value={selectedOption}
+      onChange={handleOptionChange}
+    >
+      <option value="allProducts">All Products</option>
+    </select>
+  </Card>
+  <Card className="bg-gray-200">
+    <div className="mr-auto md:mr-4 md:w-45 mt-3 ml-2">
+      <label className="block text-sm font-medium text-black mb-2 mt-0 px-1">Search by Product Code</label>
+      <Select
+        className="mb-3"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        options={filteredProducts}
+        isClearable
+      />
+    </div>
+  </Card>
+  <Card className="bg-gray-200 mb-2">
+    <div className="flex-1 mt-3 ml-2">
+      <label className="block text-sm font-medium text-black mb-2">View Count</label>
+      <Slider
+        className="w-2/3 ml-2 mb-2 rounded-md border-blue-gray-100"
+        min={1}
+        max={5}
+        valueLabelDisplay="auto"
+        keyboard
+        value={viewCount}
+        onChange={value => setViewCount(value)}
+        trackStyle={customSliderStyles.trackStyle}
+        handleStyle={customSliderStyles.handleStyle}
+        railStyle={customSliderStyles.railStyle}
+      />
+    </div>
+    <label className="block text-sm font-medium text-black mb-2 mt-2 ml-2">Based On</label>
+    <div className="flex items-center space-x-6 ml-2 mb-2">
+      <div>
+        <input
+          className="mr-1"
+          type="radio"
+          id="value"
+          name="basedOn"
+          value="value"
+          checked={basedOn === 'value'}
+          onChange={(e) => setBasedOn(e.target.value)}
+        />
+        <label htmlFor="value" className="text-black">Value</label>
+      </div>
+      <div>
+        <input
+          className="mr-1"
+          type="radio"
+          id="qty"
+          name="basedOn"
+          value="qty"
+          checked={basedOn === 'qty'}
+          onChange={(e) => setBasedOn(e.target.value)}
+        />
+        <label htmlFor="qty" className="text-black">Quantity</label>
+      </div>
+      <div>
+        <input
+          className="mr-1"
+          type="radio"
+          id="count"
+          name="basedOn"
+          value="count"
+          checked={basedOn === 'count'}
+          onChange={(e) => setBasedOn(e.target.value)}
+        />
+        <label htmlFor="count" className="text-black">Count</label>
+      </div>
+    </div>
+  </Card>
+</div>
+
     <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
       {statisticsCardsData.map(({ icon, title, footer, from, to, product, based_on, showDatePickers, showCustomFields, showOrderStats, showProductStats, showMostPurchaseProductSupplier, backgroundColor, ...rest }) => (
         <StatisticsCard
@@ -868,8 +797,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
           showOrderStats={showOrderStats}
           showProductStats={showProductStats}
           showMostPurchaseProductSupplier={showMostPurchaseProductSupplier}
-          card3Content={card3Content}
-          card4Content={card4Content}
           tableData={filteredTableData}
           selectedOption={selectedOption}
           average_price={searchTerm ? averagePrice : ""}
@@ -885,9 +812,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       ))}
     </div>
 
-  
-
-    
 
       <div className="mb-8 grid grid-cols-1 gap-y-8 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props) => (
