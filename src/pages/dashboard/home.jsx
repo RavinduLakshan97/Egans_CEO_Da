@@ -130,6 +130,61 @@ const radialBarChartTemplate = {
   },
 };
 
+const totalOrdersRadialBarChart = {
+  type: "radialBar",
+  height: 280,
+  series: [],
+  options: {
+    chart: {
+      height: 280,
+      type: "radialBar",
+    },
+    plotOptions: {
+      radialBar: {
+        hollow: {
+          margin: 0,
+          size: "70%",
+          background: "#293450"
+        },
+        track: {
+          dropShadow: {
+            enabled: true,
+            top: 2,
+            left: 0,
+            blur: 4,
+            opacity: 0.15
+          }
+        },
+        dataLabels: {
+          name: {
+            offsetY: -10,
+            color: "#fff",
+            fontSize: "13px"
+          },
+          value: {
+            color: "#fff",
+            fontSize: "30px",
+            show: true
+          }
+        }
+      }
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shade: "dark",
+        type: "vertical",
+        gradientToColors: ["#87D4F9"],
+        stops: [0, 100]
+      }
+    },
+    stroke: {
+      lineCap: "round"
+    },
+    labels: ["Progress"]
+  }
+};
+
 
 const [statisticsCardsData, setStatisticsCardsData] = useState([
   {
@@ -162,10 +217,18 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     titles: "Most Supplied Suppliers",
     chart: radialBarChartTemplate,
     showChart: true,
-    span: 2 ,
+    span: 1 ,
     
     
   },
+  {
+    color: "gray",
+    backgroundColor: "white",
+    titles: "Total Orders",
+    chart1: totalOrdersRadialBarChart,
+    showTotalOrdersChart: true,
+    span: 1,
+  }
 ]);
 
   const [statisticsChartsData, setStatisticsChartsData] = useState([
@@ -187,12 +250,6 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       description: "",
       chart: productPurchaseAuditChart,
     },
-    // {
-    //   color: "white",
-    //   title: "Pyramid Chart",
-    //   description: "",
-    //   chart: pyramidChartTemplate,
-    // },
   ]);
 
   const currentFromDate = moment().startOf('day').format('YYYY-MM-DD');
@@ -267,6 +324,12 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       fetchChartData();
     }
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
+
+  useEffect(() => {
+    if (fromDate && toDate && searchTerm) {
+      fetchTotalOrdersData();
+    }
+  }, [fromDate, toDate, searchTerm]);
   
   
   const fetchProducts = async () => {
@@ -492,6 +555,47 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       );
     } catch (error) {
       console.error("Error fetching Maximum Orders For Products data:", error);
+    }
+  };
+  
+
+  //total no of orders radial bar chart
+
+  const fetchTotalOrdersData = async () => {
+    try {
+      const response = await axios.get(`${Total_Orders_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`);
+      const totalOrders = response.data.totNoOfOrders[0].totalOrders;
+      
+      const updatedChartState = {
+        ...totalOrdersRadialBarChart,
+        series: [totalOrders], // Set the fetched total orders
+        options: {
+          ...totalOrdersRadialBarChart.options,
+          plotOptions: {
+            ...totalOrdersRadialBarChart.options.plotOptions,
+            radialBar: {
+              ...totalOrdersRadialBarChart.options.plotOptions.radialBar,
+              dataLabels: {
+                ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels,
+                total: {
+                  ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
+                  formatter: () => `${totalOrders}%`
+                }
+              }
+            }
+          }
+        }
+      };
+  
+      setStatisticsCardsData(prevState => 
+        prevState.map(cardData => 
+          cardData.titles === "Total Orders"
+            ? { ...cardData, chart1: updatedChartState }
+            : cardData
+        )
+      );
+    } catch (error) {
+      console.error("Error fetching total orders data:", error);
     }
   };
   

@@ -25,7 +25,9 @@ export function StatisticsCard({
   bestBuyProducts,
   bestBuySupplierCode,
   chart,
+  chart1,
   showChart,
+  showTotalOrdersChart,
   span = 1, // New prop to determine the span of the card
   ...rest
 }) {
@@ -114,6 +116,11 @@ export function StatisticsCard({
             <Chart {...chart} />
           </div>
         )}
+        {showTotalOrdersChart && chart1 && (
+          <div className="card-chart mt-4">
+            <Chart {...chart1} />
+          </div>
+        )}
         {footer && (
           <div className="card-footer mt-2">
             <p className={`text-${footer.color}`}>{footer.value} {footer.label}</p>
@@ -149,7 +156,9 @@ StatisticsCard.propTypes = {
   lowest_price: PropTypes.string,
   lowest_price_date: PropTypes.string,
   chart: PropTypes.object,
+  chart1: PropTypes.object,
   showChart: PropTypes.bool,
+  showTotalOrdersChart: PropTypes.bool, // New prop for the new chart
   span: PropTypes.number, // Add this prop type
 };
 
