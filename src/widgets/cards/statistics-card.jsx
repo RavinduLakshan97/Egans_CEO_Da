@@ -111,14 +111,17 @@ export function StatisticsCard({
             </div>
           </div>
         )}
+        <Typography variant="h6" color="blue-gray">{titles}</Typography>
         {showChart && chart && (
           <div className="card-chart mt-4">
             <Chart {...chart} />
+            
           </div>
         )}
         {showTotalOrdersChart && chart1 && (
           <div className="card-chart mt-4">
             <Chart {...chart1} />
+          
           </div>
         )}
         {footer && (
@@ -126,7 +129,7 @@ export function StatisticsCard({
             <p className={`text-${footer.color}`}>{footer.value} {footer.label}</p>
           </div>
         )}
-         <Typography variant="h6" color="blue-gray">{titles}</Typography>
+         
       </CardBody>
     </Card>
   );

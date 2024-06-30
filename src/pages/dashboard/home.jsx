@@ -141,28 +141,18 @@ const totalOrdersRadialBarChart = {
     },
     plotOptions: {
       radialBar: {
-        hollow: {
-          margin: 0,
-          size: "70%",
-          background: "#293450"
-        },
+        startAngle: -135,
+        endAngle: 135,
         track: {
-          dropShadow: {
-            enabled: true,
-            top: 2,
-            left: 0,
-            blur: 4,
-            opacity: 0.15
-          }
+          background: '#333',
+          startAngle: -135,
+          endAngle: 135,
         },
         dataLabels: {
           name: {
-            offsetY: -10,
-            color: "#fff",
-            fontSize: "13px"
+            show: false,
           },
           value: {
-            color: "#fff",
             fontSize: "30px",
             show: true
           }
@@ -173,13 +163,13 @@ const totalOrdersRadialBarChart = {
       type: "gradient",
       gradient: {
         shade: "dark",
-        type: "vertical",
+        type: "horizontal",
         gradientToColors: ["#87D4F9"],
         stops: [0, 100]
       }
     },
     stroke: {
-      lineCap: "round"
+      lineCap: "butt"
     },
     labels: ["Progress"]
   }
@@ -566,9 +556,11 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       const response = await axios.get(`${Total_Orders_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`);
       const totalOrders = response.data.totNoOfOrders[0].totalOrders;
       
+      const percentage = (totalOrders / 10000) * 100; // Calculate the percentage of total orders out of 10,000
+      
       const updatedChartState = {
         ...totalOrdersRadialBarChart,
-        series: [totalOrders], // Set the fetched total orders
+        series: [percentage], // Set the calculated percentage
         options: {
           ...totalOrdersRadialBarChart.options,
           plotOptions: {
@@ -579,11 +571,15 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
                 ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels,
                 total: {
                   ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
-                  formatter: () => `${totalOrders}%`
+                  formatter: () => `${percentage.toFixed(2)}%` // Display the percentage
+                },
+                value: {
+                  formatter: (val) => `${val.toFixed(2)}%` // Display the percentage in the value label as well
                 }
               }
             }
-          }
+          },
+          labels: [`Total Orders: ${totalOrders}`] // Display total orders as a label
         }
       };
   
@@ -598,6 +594,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       console.error("Error fetching total orders data:", error);
     }
   };
+  
   
   
   
