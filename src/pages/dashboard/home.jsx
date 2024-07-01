@@ -86,7 +86,7 @@ const productPurchaseAuditChart = {
   options: {
     ...chartsConfig,
     colors: ["#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#FFCD56", "#C9CBCF", "#36A2EB"],
-    labels: [],
+    labels: [""],
   },
 };
 
@@ -155,6 +155,13 @@ const totalOrdersRadialBarChart = {
           value: {
             fontSize: "30px",
             show: true
+          },
+          total: {
+            show: true,
+            label: 'Total Orders',
+            formatter: function() {
+              return '0';
+            }
           }
         }
       }
@@ -171,9 +178,19 @@ const totalOrdersRadialBarChart = {
     stroke: {
       lineCap: "butt"
     },
-    labels: ["Progress"]
+    labels: [""],
+    //colors: ["#FF4560"],
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: function(val, opts) {
+          return `${opts.w.globals.series[opts.seriesIndex]} Orders`;
+        }
+      }
+    }
   }
 };
+
 
 
 const [statisticsCardsData, setStatisticsCardsData] = useState([
@@ -189,17 +206,17 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     },
     showCustomFields: true,
   },
-  {
-    color: "gray",
-    backgroundColor: "bg-custom-green",
-    value: "3,462",
-    footer: {
-      color: "text-red-500",
-      value: "-2%",
-      label: "than yesterday",
-    },
-    showOrderStats: true,
-  },
+  // {
+  //   color: "gray",
+  //   backgroundColor: "bg-custom-green",
+  //   value: "3,462",
+  //   footer: {
+  //     color: "text-red-500",
+  //     value: "-2%",
+  //     label: "than yesterday",
+  //   },
+  //   showOrderStats: true,
+  // },
   // Add the chart cards here
   {
     color: "gray",
@@ -207,7 +224,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     titles: "Most Supplied Suppliers",
     chart: radialBarChartTemplate,
     showChart: true,
-    span: 1 ,
+    span: 2 ,
     
     
   },
@@ -551,49 +568,56 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
 
   //total no of orders radial bar chart
 
-  const fetchTotalOrdersData = async () => {
-    try {
-      const response = await axios.get(`${Total_Orders_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`);
-      const totalOrders = response.data.totNoOfOrders[0].totalOrders;
-      
-      const percentage = (totalOrders / 10000) * 100; // Calculate the percentage of total orders out of 10,000
-      
-      const updatedChartState = {
-        ...totalOrdersRadialBarChart,
-        series: [percentage], // Set the calculated percentage
-        options: {
-          ...totalOrdersRadialBarChart.options,
-          plotOptions: {
-            ...totalOrdersRadialBarChart.options.plotOptions,
-            radialBar: {
-              ...totalOrdersRadialBarChart.options.plotOptions.radialBar,
-              dataLabels: {
-                ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels,
-                total: {
-                  ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
-                  formatter: () => `${percentage.toFixed(2)}%` // Display the percentage
-                },
-                value: {
-                  formatter: (val) => `${val.toFixed(2)}%` // Display the percentage in the value label as well
-                }
+const fetchTotalOrdersData = async () => {
+  try {
+    const response = await axios.get(`${Total_Orders_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}`);
+    const totalOrders = response.data.totNoOfOrders[0].totalOrders;
+
+    const percentage = (totalOrders / 10000) * 100; // Calculate the percentage of total orders out of 10,000
+
+    const updatedChartState = {
+      ...totalOrdersRadialBarChart,
+      series: [percentage], // Set the calculated percentage
+      options: {
+        ...totalOrdersRadialBarChart.options,
+        plotOptions: {
+          ...totalOrdersRadialBarChart.options.plotOptions,
+          radialBar: {
+            ...totalOrdersRadialBarChart.options.plotOptions.radialBar,
+            dataLabels: {
+              ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels,
+              total: {
+                ...totalOrdersRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
+                formatter: () => `${percentage.toFixed(2)}%` // Display the percentage
+              },
+              value: {
+                formatter: (val) => `${val.toFixed(2)}%` // Display the percentage in the value label as well
               }
             }
-          },
-          labels: [`Total Orders: ${totalOrders}`] // Display total orders as a label
+          }
+        },
+        //labels: [` ${totalOrders}`], // Display total orders as a label
+        tooltip: {
+          enabled: true,
+          y: {
+            formatter: (val) => `${totalOrders} Orders` // Display total orders in the tooltip
+          }
         }
-      };
-  
-      setStatisticsCardsData(prevState => 
-        prevState.map(cardData => 
-          cardData.titles === "Total Orders"
-            ? { ...cardData, chart1: updatedChartState }
-            : cardData
-        )
-      );
-    } catch (error) {
-      console.error("Error fetching total orders data:", error);
-    }
-  };
+      }
+    };
+
+    setStatisticsCardsData(prevState => 
+      prevState.map(cardData => 
+        cardData.titles === "Total Orders"
+          ? { ...cardData, chart1: updatedChartState }
+          : cardData
+      )
+    );
+  } catch (error) {
+    console.error("Error fetching total orders data:", error);
+  }
+};
+
   
   
   
@@ -880,6 +904,22 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
       </div>
     </div>
   </Card>
+  <Card className="bg-gray-200" style={{ backgroundColor: "#d8e2dc" }}>
+    <label className="block text-sm font-medium text-black mb-4 mt-3 px-4">Average Price</label>
+                <input
+                type="text"
+                className="mt-0 mb-2 ml-2 block w-4/5 xl:h-1/3 px-3 py-3 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
+                value={averagePriceQTY}
+              />
+  </Card>
+  {/* <Card className="bg-gray-200">
+    <label className="block text-sm font-medium text-black mb-4 mt-3 px-4">Highest Price</label>
+                <input
+                type="text"
+                className="mt-0 mb-2 ml-2 block w-4/5 xl:h-1/3 px-3 py-3 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
+                value={highestPrice}
+              />
+  </Card> */}
 </div>
 
     <div className="mb-8 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">

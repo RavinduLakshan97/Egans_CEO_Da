@@ -37,7 +37,7 @@ export function StatisticsCard({
        
       {showCustomFields && (
   <div>
-    <div className="mb-4">
+    {/* <div className="mb-3">
       <label className="block text-sm font-medium text-black mb-1 sm:mb-2 lg:mb-1">Average Price</label>
       <input
         type="text"
@@ -45,8 +45,16 @@ export function StatisticsCard({
         value={average_price}
         readOnly
       />
-    </div>
-    <div className="mb-4 sm:grid sm:grid-cols-2 sm:gap-4 flex flex-col">
+    </div> */}
+    <div className="mb-3">
+              <label className="block text-sm font-medium text-black mb-1">Average Purchased Quantity</label>
+              <input
+                type="text"
+                className="mt-1 block w-full xl:h-1/3 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
+                value={average_price_quantity}
+              />
+            </div>
+    <div className="mb-3 sm:grid sm:grid-cols-2 sm:gap-4 flex flex-col">
       <div className="flex flex-col space-y-2">
         <label className="block text-sm font-medium text-black mb-1 sm:mb-2 lg:mb-1">Highest Price</label>
         <input
@@ -61,7 +69,7 @@ export function StatisticsCard({
         <span className="mt-2 lg:mt-0 block text-sm text-gray-700 ml-4">{highest_price_date}</span>
       </div>
     </div>
-    <div className="mb-4 sm:grid sm:grid-cols-2 sm:gap-4 flex flex-col">
+    <div className="mb-3 sm:grid sm:grid-cols-2 sm:gap-4 flex flex-col">
       <div className="flex flex-col space-y-2">
         <label className="block text-sm font-medium text-black mb-1 sm:mb-2 lg:mb-1">Lowest Price</label>
         <input
@@ -76,11 +84,12 @@ export function StatisticsCard({
         <span className="mt-2 lg:mt-0 block text-sm text-gray-700 ml-4">{lowest_price_date}</span>
       </div>
     </div>
+    
   </div>
 )}
 
 
-        {showOrderStats && (
+        {/* {showOrderStats && (
           <div>
             <div className="mb-5">
               <label className="block text-sm font-medium text-black mb-1">Average Purchased Quantity</label>
@@ -110,7 +119,7 @@ export function StatisticsCard({
               />
             </div>
           </div>
-        )}
+        )} */}
         <Typography variant="h6" color="blue-gray">{titles}</Typography>
         {showChart && chart && (
           <div className="card-chart mt-4">
