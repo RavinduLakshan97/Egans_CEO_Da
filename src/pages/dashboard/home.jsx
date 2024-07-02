@@ -191,6 +191,82 @@ const totalOrdersRadialBarChart = {
   }
 };
 
+const maxPriceRadialBarChart = {
+  type: "radialBar",
+  height: 280,
+  series: [],
+  options: {
+    chart: {
+      height: 280,
+      type: "radialBar",
+    },
+    plotOptions: {
+      radialBar: {
+        hollow: {
+          margin: 5,
+          size: '30%',
+          background: 'transparent',
+        },
+        dataLabels: {
+          name: {
+            show: true,
+            formatter: function(val, opts) {
+              if (opts.seriesIndex === 0) return `Max Price`;
+              if (opts.seriesIndex === 1) return `Avg Price`;
+              if (opts.seriesIndex === 2) return `Min Price`;
+              return `${val}`;
+            }
+          },
+          value: {
+            fontSize: "20px",
+            show: true,
+            formatter: function(val, opts) {
+              if (opts.seriesIndex === 0) return `$${val.toFixed(2)}`;
+              if (opts.seriesIndex === 1) return `$${val.toFixed(2)}`;
+              if (opts.seriesIndex === 2) return `$${val.toFixed(2)}`;
+              return `$${val.toFixed(2)}`;
+            }
+          },
+          total: {
+            show: true,
+            label: 'Min Price',
+            formatter: function(w) {
+              const minPrice = w.config.series[2];
+              return `$${minPrice.toFixed(2)}`;
+            }
+          }
+        }
+      }
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shade: "dark",
+        type: "horizontal",
+        gradientToColors: ["#87D4F9", "#FF4560", "#00E396"], // Colors for maxPrice, avgPrice, minPrice
+        stops: [0, 100]
+      }
+    },
+    stroke: {
+      lineCap: "butt"
+    },
+    labels: ["Max Price", "Avg Price", "Min Price"],
+    colors: ["#87D4F9", "#FF4560", "#00E396"], // Colors for maxPrice, avgPrice, minPrice
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: function(val, opts) {
+          const label = opts.w.globals.labels[opts.seriesIndex];
+          return `${label}: $${val.toFixed(2)}`;
+        }
+      }
+    }
+  }
+};
+
+
+
+
 
 
 const [statisticsCardsData, setStatisticsCardsData] = useState([
@@ -224,7 +300,7 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     titles: "Most Supplied Suppliers",
     chart: radialBarChartTemplate,
     showChart: true,
-    span: 2 ,
+    span: 1 ,
     
     
   },
@@ -234,6 +310,14 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     titles: "Total Orders",
     chart1: totalOrdersRadialBarChart,
     showTotalOrdersChart: true,
+    span: 1,
+  },
+  {
+    color: "gray",
+    backgroundColor: "white",
+    titles: "Max Price",
+    chart2: maxPriceRadialBarChart,
+    showMaxPriceChart: true, 
     span: 1,
   }
 ]);
@@ -332,9 +416,12 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     }
   }, [fromDate, toDate, searchTerm, basedOn, viewCount]);
 
+
+
   useEffect(() => {
     if (fromDate && toDate && searchTerm) {
       fetchTotalOrdersData();
+      fetchMaxPriceData(); // Fetch max price data
     }
   }, [fromDate, toDate, searchTerm]);
   
@@ -617,6 +704,82 @@ const fetchTotalOrdersData = async () => {
     console.error("Error fetching total orders data:", error);
   }
 };
+
+
+//max price radial bar chart
+
+const fetchMaxPriceData = async () => {
+  try {
+    const response = await axios.get(`${Analytics_Price_URL}?from=${fromDate}&to=${toDate}&productCode=${searchTerm.value}&viewCount=${viewCount}`);
+    const maxPrice = response.data.DashboardPrices[0].maxPrice;
+    const minPrice = response.data.DashboardPrices[0].minPrice;
+    const avgPrice = response.data.DashboardPrices[0].avgPrice;
+
+    // Calculate percentages
+    const minPricePercentage = (minPrice / maxPrice) * 100;
+    const avgPricePercentage = (avgPrice / maxPrice) * 100;
+
+    const updatedChartState = {
+      ...maxPriceRadialBarChart,
+      series: [100, avgPricePercentage, minPricePercentage], // Max price as 100%, avgPrice and minPrice as percentages
+      options: {
+        ...maxPriceRadialBarChart.options,
+        plotOptions: {
+          ...maxPriceRadialBarChart.options.plotOptions,
+          radialBar: {
+            ...maxPriceRadialBarChart.options.plotOptions.radialBar,
+            hollow: {
+              margin: 5,
+              size: '30%',
+              background: 'transparent',
+            },
+            dataLabels: {
+              ...maxPriceRadialBarChart.options.plotOptions.radialBar.dataLabels,
+              total: {
+                ...maxPriceRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
+                formatter: function() {
+                  return `${minPrice.toFixed(2)}`; // Display the min price
+                }
+              },
+              value: {
+                formatter: function(val, opts) {
+                  if (opts.seriesIndex === 0) return `Max: $${maxPrice.toFixed(2)}`;
+                  if (opts.seriesIndex === 1) return `Avg: $${avgPrice.toFixed(2)}`;
+                  if (opts.seriesIndex === 2) return `Min: $${minPrice.toFixed(2)}`;
+                  return `$${val.toFixed(2)}`;
+                }
+              }
+            }
+          }
+        },
+        tooltip: {
+          enabled: false,
+          y: {
+            formatter: (val, opts) => {
+              const label = opts.w.globals.labels[opts.seriesIndex];
+              return `${label}: $${val.toFixed(2)}`;
+            }
+          }
+        }
+      }
+    };
+
+    setStatisticsCardsData(prevState => 
+      prevState.map(cardData => 
+        cardData.titles === "Max Price"
+          ? { ...cardData, chart2: updatedChartState }
+          : cardData
+      )
+    );
+  } catch (error) {
+    console.error("Error fetching max price data:", error);
+  }
+};
+
+
+
+
+
 
   
   

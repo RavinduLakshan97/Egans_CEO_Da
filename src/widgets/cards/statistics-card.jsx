@@ -26,8 +26,10 @@ export function StatisticsCard({
   bestBuySupplierCode,
   chart,
   chart1,
+  chart2,
   showChart,
   showTotalOrdersChart,
+  showMaxPriceChart,
   span = 1, // New prop to determine the span of the card
   ...rest
 }) {
@@ -138,6 +140,11 @@ export function StatisticsCard({
             <p className={`text-${footer.color}`}>{footer.value} {footer.label}</p>
           </div>
         )}
+        {showMaxPriceChart && chart2 && ( // Add this block to render the new maxPrice chart
+        <div className="card-chart mt-4">
+          <Chart {...chart2} />
+        </div>
+      )}
          
       </CardBody>
     </Card>
@@ -169,9 +176,11 @@ StatisticsCard.propTypes = {
   lowest_price_date: PropTypes.string,
   chart: PropTypes.object,
   chart1: PropTypes.object,
+  chart2: PropTypes.object,
   showChart: PropTypes.bool,
-  showTotalOrdersChart: PropTypes.bool, // New prop for the new chart
-  span: PropTypes.number, // Add this prop type
+  showTotalOrdersChart: PropTypes.bool, 
+  showMaxPriceChart: PropTypes.bool,
+  span: PropTypes.number,
 };
 
 StatisticsCard.displayName = "/src/widgets/cards/statistics-card.jsx";
