@@ -909,7 +909,7 @@ const fetchTotalOrdersData = async () => {
                 <input
                 type="text"
                 className="mt-0 mb-2 ml-2 block w-4/5 xl:h-1/3 px-3 py-3 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-600"
-                value={averagePriceQTY}
+                value={averagePrice}
               />
   </Card>
   {/* <Card className="bg-gray-200">
