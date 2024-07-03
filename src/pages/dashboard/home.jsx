@@ -232,7 +232,7 @@ const maxPriceRadialBarChart = {
             label: 'Min Price',
             formatter: function(w) {
               const minPrice = w.config.series[2];
-              return `$${minPrice.toFixed(2)}`;
+              return `${minPrice.toFixed(2)}`;
             }
           }
         }
@@ -259,7 +259,7 @@ const maxPriceRadialBarChart = {
           if (opts.seriesIndex === 0) return `Max: $${val.toFixed(2)}`;
           if (opts.seriesIndex === 1) return `Avg: $${val.toFixed(2)}`;
           if (opts.seriesIndex === 2) return `Min: $${val.toFixed(2)}`;
-          return `$${val.toFixed(2)}`;
+          return `${val.toFixed(2)}`;
         }
       }
     }
@@ -740,7 +740,7 @@ const fetchMaxPriceData = async () => {
               total: {
                 ...maxPriceRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
                 formatter: function() {
-                  return `$${minPrice.toFixed(2)}`; // Display the min price
+                  return `${minPrice.toFixed(2)}`; // Display the min price
                 }
               },
               value: {
