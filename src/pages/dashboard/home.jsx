@@ -256,8 +256,10 @@ const maxPriceRadialBarChart = {
       enabled: true,
       y: {
         formatter: function(val, opts) {
-          const label = opts.w.globals.labels[opts.seriesIndex];
-          return `${label}: $${val.toFixed(2)}`;
+          if (opts.seriesIndex === 0) return `Max: $${val.toFixed(2)}`;
+          if (opts.seriesIndex === 1) return `Avg: $${val.toFixed(2)}`;
+          if (opts.seriesIndex === 2) return `Min: $${val.toFixed(2)}`;
+          return `$${val.toFixed(2)}`;
         }
       }
     }
@@ -738,26 +740,28 @@ const fetchMaxPriceData = async () => {
               total: {
                 ...maxPriceRadialBarChart.options.plotOptions.radialBar.dataLabels.total,
                 formatter: function() {
-                  return `${minPrice.toFixed(2)}`; // Display the min price
+                  return `$${minPrice.toFixed(2)}`; // Display the min price
                 }
               },
               value: {
                 formatter: function(val, opts) {
-                  if (opts.seriesIndex === 0) return `Max: $${maxPrice.toFixed(2)}`;
-                  if (opts.seriesIndex === 1) return `Avg: $${avgPrice.toFixed(2)}`;
-                  if (opts.seriesIndex === 2) return `Min: $${minPrice.toFixed(2)}`;
-                  return `$${val.toFixed(2)}`;
+                  if (opts.seriesIndex === 0) return `${maxPrice.toFixed(2)}`;
+                  if (opts.seriesIndex === 1) return `${avgPrice.toFixed(2)}`;
+                  if (opts.seriesIndex === 2) return `${minPrice.toFixed(2)}`;
+                  return `${val.toFixed(2)}`;
                 }
               }
             }
           }
         },
         tooltip: {
-          enabled: false,
+          enabled: true,
           y: {
             formatter: (val, opts) => {
-              const label = opts.w.globals.labels[opts.seriesIndex];
-              return `${label}: $${val.toFixed(2)}`;
+              if (opts.seriesIndex === 0) return `${maxPrice.toFixed(2)}`;
+              if (opts.seriesIndex === 1) return `${avgPrice.toFixed(2)}`;
+              if (opts.seriesIndex === 2) return `${minPrice.toFixed(2)}`;
+              return `${val.toFixed(2)}`;
             }
           }
         }
