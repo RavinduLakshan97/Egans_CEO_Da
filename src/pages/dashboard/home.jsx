@@ -228,7 +228,7 @@ const maxPriceRadialBarChart = {
             }
           },
           total: {
-            show: true,
+            show: false,
             label: 'Min Price',
             formatter: function(w) {
               const minPrice = w.config.series[2];
@@ -284,17 +284,14 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     },
     showCustomFields: true,
   },
-  // {
-  //   color: "gray",
-  //   backgroundColor: "bg-custom-green",
-  //   value: "3,462",
-  //   footer: {
-  //     color: "text-red-500",
-  //     value: "-2%",
-  //     label: "than yesterday",
-  //   },
-  //   showOrderStats: true,
-  // },
+  {
+    color: "gray",
+    backgroundColor: "white",
+    titles: "Price Variance",
+    chart2: maxPriceRadialBarChart,
+    showMaxPriceChart: true, 
+    span: 1,
+  },
   // Add the chart cards here
   {
     color: "gray",
@@ -313,15 +310,8 @@ const [statisticsCardsData, setStatisticsCardsData] = useState([
     chart1: totalOrdersRadialBarChart,
     showTotalOrdersChart: true,
     span: 1,
-  },
-  {
-    color: "gray",
-    backgroundColor: "white",
-    titles: "Max Price",
-    chart2: maxPriceRadialBarChart,
-    showMaxPriceChart: true, 
-    span: 1,
   }
+  
 ]);
 
   const [statisticsChartsData, setStatisticsChartsData] = useState([
@@ -770,7 +760,7 @@ const fetchMaxPriceData = async () => {
 
     setStatisticsCardsData(prevState => 
       prevState.map(cardData => 
-        cardData.titles === "Max Price"
+        cardData.titles === "Price Variance"
           ? { ...cardData, chart2: updatedChartState }
           : cardData
       )
